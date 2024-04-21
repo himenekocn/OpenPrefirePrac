@@ -13,7 +13,7 @@
     "practice.begin": "训练愉快！",
     "practice.exit": "预瞄训练模式已退出。",
     "practice.finish": "恭喜！您完成了训练！",
-    "practice.progress": "全部目标数: {0}; 剩余: {1}",
+    "practice.progress": "全部目标数: {0} 剩余: {1}",
     "difficulty.title": "请选择难度",
     "difficulty.0": "惨烈 - 初始 100HP",
     "difficulty.1": "传奇 - 初始 500HP",
