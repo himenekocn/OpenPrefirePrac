@@ -15,7 +15,7 @@ namespace OpenPrefirePrac;
 public class OpenPrefirePrac : BasePlugin
 {
     public override string ModuleName => "Open Prefire Prac";
-    public override string ModuleVersion => "0.1.28";
+    public override string ModuleVersion => "0.1.28c";
     public override string ModuleAuthor => "Lengran";
     public override string ModuleDescription => "A plugin for practicing prefire in CS2. https://github.com/lengran/OpenPrefirePrac";
 
@@ -107,7 +107,7 @@ public class OpenPrefirePrac : BasePlugin
                 	if(_playerStatuses[player].PracticeIndex == -1)
     			{
        				SetMoveType(player, MoveType_t.MOVETYPE_NONE);
-				player.PrintToCenter("使用 !prefire 开始训练 \n当前无法移动");
+				player.PrintToCenter("输入 !prefire 开始你的训练 \n由于未开始，当前无法移动");
    			}
       			else
 	 		{
@@ -447,6 +447,26 @@ public class OpenPrefirePrac : BasePlugin
         return HookResult.Continue;
     }
 
+    [ConsoleCommand("css_menu", "Print available prefire routes and receive user's choice")]
+    [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+    public void OnPrefireCommand(CCSPlayerController player, CommandInfo commandInfo)
+    {       
+        var mainMenu = new ChatMenu(_translator!.Translate(player, "mainmenu.title"));
+
+        mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.practice"), OpenPracticeMenu);
+        mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.map"), OpenMapMenu);
+        var currentDifficulty = _translator.Translate(player, $"difficulty.{_playerStatuses[player].HealingMethod}");
+        mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.difficulty", currentDifficulty), OpenDifficultyMenu);
+        var currentTrainingMode = _translator.Translate(player, $"modemenu.{_playerStatuses[player].TrainingMode}");
+        mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.mode", currentTrainingMode), OpenModeMenu);
+        //mainMenu.AddMenuOption("Language preference", OpenLanguageMenu);
+        mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.exit"), ForceExitPrefireMode);
+        
+        player.PrintToChat("================== [HIME] =================");
+        MenuManager.OpenChatMenu(player, mainMenu);
+        player.PrintToChat("===========================================");
+    }
+
     [ConsoleCommand("css_prefire", "Print available prefire routes and receive user's choice")]
     [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
     public void OnPrefireCommand(CCSPlayerController player, CommandInfo commandInfo)
@@ -459,7 +479,7 @@ public class OpenPrefirePrac : BasePlugin
         mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.difficulty", currentDifficulty), OpenDifficultyMenu);
         var currentTrainingMode = _translator.Translate(player, $"modemenu.{_playerStatuses[player].TrainingMode}");
         mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.mode", currentTrainingMode), OpenModeMenu);
-        mainMenu.AddMenuOption("Language preference", OpenLanguageMenu);
+        //mainMenu.AddMenuOption("Language preference", OpenLanguageMenu);
         mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.exit"), ForceExitPrefireMode);
         
         player.PrintToChat("================== [HIME] =================");
