@@ -97,7 +97,7 @@ public class OpenPrefirePrac : BasePlugin
 
     	public void PlayerOnTick()
 	{
-                foreach (CCSPlayerController player in connectedPlayers.Values)
+                foreach (CCSPlayerController player in Utilities.GetPlayers())
                 {
                     	if (player == null || !player.IsValid || player.Slot == null || player.IsHLTV || player.IsBot) continue;
 
@@ -114,7 +114,7 @@ public class OpenPrefirePrac : BasePlugin
 
             for (int i = 0; i < Server.MaxPlayers; i++)
             {
-                var controller = GetPlayerFromSlot(i);
+                var controller = Utilities.GetPlayerFromSlot(i);
 
                 if (!controller.IsValid || controller.UserId == -1 || controller.IsHLTV || controller.IsBot)
                     continue;
