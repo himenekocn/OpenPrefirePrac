@@ -303,7 +303,7 @@ public class OpenPrefirePrac : BasePlugin
                             .Rotation);
                     
                     Server.NextFrame(() => FreezeBot(playerOrBot));
-		    AddTimer(1.0f, () => SetPlayerClanTag(player));
+		    AddTimer(1.0f, () => SetPlayerClanTag(playerOrBot));
                 }
                 else
                 {
