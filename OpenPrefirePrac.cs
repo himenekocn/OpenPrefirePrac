@@ -31,7 +31,7 @@ public class OpenPrefirePrac : BasePlugin
     
     private int _playerCount;
 
-    //private int _SerplayerCount;
+    private int _SerplayerCount;
     
     private readonly List<PrefirePractice> _practices = new();
     
@@ -50,7 +50,7 @@ public class OpenPrefirePrac : BasePlugin
     public override void Load(bool hotReload)
     {
         _playerCount = 0;
-	//_SerplayerCount = 0;
+	_SerplayerCount = 0;
 
         _translator = new Translator(Localizer, ModuleDirectory, CultureInfo.CurrentCulture.Name);
         
@@ -70,7 +70,7 @@ public class OpenPrefirePrac : BasePlugin
             _availableMaps.Clear();
             _mapName = "";
             _playerCount = 0;
-	    //_SerplayerCount = 0;
+	    _SerplayerCount = 0;
             _playerStatuses.Clear();
             
             // Clear saved convars
@@ -172,14 +172,15 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
-		int playercount = GetOnlinePlayers().Count();
+		_SerplayerCount++;
+		//int playercount = GetOnlinePlayers().Count();
   		Console.WriteLine($"[HIME] =======================================.");
-		Console.WriteLine($"[HIME] Connect Get Players Count {playercount}.");
-  		foreach (var players in GetOnlinePlayers().Where(players => players is { IsValid: true, IsBot: false, IsHLTV: false }))
-            	{
-	     		Console.WriteLine($"[HIME] OnlinePlayer: {players.PlayerName}.");
-            	}
-		if(playercount > 3)
+		Console.WriteLine($"[HIME] Connect Get Players Now Count {_SerplayerCount}.");
+  		//foreach (var players in GetOnlinePlayers().Where(players => players is { IsValid: true, IsBot: false, IsHLTV: false }))
+            	//{
+	     	//	Console.WriteLine($"[HIME] OnlinePlayer: {players.PlayerName}.");
+            	//}
+		if(_SerplayerCount > 3)
   		{
     			Console.WriteLine($"[HIME] Full Player kick {player.PlayerName}.");
     			Server.ExecuteCommand($"kickid {player.UserId}");
@@ -202,11 +203,10 @@ public class OpenPrefirePrac : BasePlugin
         var player = @event.Userid;
 	if (player.IsValid && !player.IsBot && !player.IsHLTV)
         {
- 	//	_SerplayerCount--;
-   	//}
+ 		_SerplayerCount--;
     		Console.WriteLine($"[HIME] =======================================.");
-    		int playercount = GetOnlinePlayers().Count();
-		Console.WriteLine($"[HIME] Disconnect Get Players Count {playercount}.");
+    		//int playercount = GetOnlinePlayers().Count();
+		Console.WriteLine($"[HIME] Disconnect Get Players Count {_SerplayerCount}.");
  		Console.WriteLine($"[HIME] =======================================.");
  	}
 
