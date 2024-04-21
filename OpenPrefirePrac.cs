@@ -104,6 +104,7 @@ public class OpenPrefirePrac : BasePlugin
 		if (player == null || !player.IsValid || !player.IsBot || player.IsHLTV) return;
   
 		player.Clan = "HIME-BOT";
+  		player.ClanName = "HIME-BOT";
  	}
 
     	public void PlayerOnTick()
