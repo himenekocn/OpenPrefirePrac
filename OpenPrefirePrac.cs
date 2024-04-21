@@ -30,6 +30,8 @@ public class OpenPrefirePrac : BasePlugin
     private string _mapName = "";
     
     private int _playerCount;
+
+    private int _SerplayerCount;
     
     private readonly List<PrefirePractice> _practices = new();
     
@@ -48,6 +50,7 @@ public class OpenPrefirePrac : BasePlugin
     public override void Load(bool hotReload)
     {
         _playerCount = 0;
+	_SerplayerCount = 0;
 
         _translator = new Translator(Localizer, ModuleDirectory, CultureInfo.CurrentCulture.Name);
         
@@ -67,6 +70,7 @@ public class OpenPrefirePrac : BasePlugin
             _availableMaps.Clear();
             _mapName = "";
             _playerCount = 0;
+	    _SerplayerCount = 0;
             _playerStatuses.Clear();
             
             // Clear saved convars
@@ -168,12 +172,13 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
-		int playercount = GetOnlinePlayers().Count();
-		Console.WriteLine($"[OpenPrefirePrac] Players Count {playercount}.");
-		if(playercount > 2)
+		//int playercount = GetOnlinePlayers().Count();
+		Console.WriteLine($"[OpenPrefirePrac] Players Count {_SerplayerCount}.");
+		if(_SerplayerCount > 3)
   		{
     			Server.ExecuteCommand($"kickid {player.UserId}");
   		}else{
+    		_SerplayerCount++;
             	// For players:
             	_playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
 
@@ -187,6 +192,10 @@ public class OpenPrefirePrac : BasePlugin
     public HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
     {
         var player = @event.Userid;
+	if (player.IsValid && !player.IsBot && !player.IsHLTV)
+        {
+ 		_SerplayerCount--;
+   	}
 
         if (!_playerStatuses.ContainsKey(player))
             return HookResult.Continue;
