@@ -448,25 +448,6 @@ public class OpenPrefirePrac : BasePlugin
     }
 
     [ConsoleCommand("css_menu", "Print available prefire routes and receive user's choice")]
-    [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
-    public void OnPrefireCommand(CCSPlayerController player, CommandInfo commandInfo)
-    {       
-        var mainMenu = new ChatMenu(_translator!.Translate(player, "mainmenu.title"));
-
-        mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.practice"), OpenPracticeMenu);
-        mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.map"), OpenMapMenu);
-        var currentDifficulty = _translator.Translate(player, $"difficulty.{_playerStatuses[player].HealingMethod}");
-        mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.difficulty", currentDifficulty), OpenDifficultyMenu);
-        var currentTrainingMode = _translator.Translate(player, $"modemenu.{_playerStatuses[player].TrainingMode}");
-        mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.mode", currentTrainingMode), OpenModeMenu);
-        //mainMenu.AddMenuOption("Language preference", OpenLanguageMenu);
-        mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.exit"), ForceExitPrefireMode);
-        
-        player.PrintToChat("================== [HIME] =================");
-        MenuManager.OpenChatMenu(player, mainMenu);
-        player.PrintToChat("===========================================");
-    }
-
     [ConsoleCommand("css_prefire", "Print available prefire routes and receive user's choice")]
     [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
     public void OnPrefireCommand(CCSPlayerController player, CommandInfo commandInfo)
