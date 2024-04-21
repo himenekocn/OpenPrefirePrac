@@ -315,8 +315,8 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
-		playerOrBot.PlayerPawn.Value.MoveType = MOVETYPE_NONE;
-            	playerOrBot.PlayerPawn.Value.ActualMoveType = MOVETYPE_NONE;
+		playerOrBot.PlayerPawn.Value.MoveType = MoveType_t.MOVETYPE_NONE;
+            	playerOrBot.PlayerPawn.Value.ActualMoveType = MoveType_t.MOVETYPE_NONE;
 	     
             // For players: Set them up if they are practicing.
             if (!_playerStatuses.ContainsKey(playerOrBot))
@@ -781,8 +781,8 @@ public class OpenPrefirePrac : BasePlugin
         AddTimer(1f, () => EquipPlayer(player));
         AddTimer(1.5f, () => MovePlayer(player, false, _practices[practiceNo].Player.Position, _practices[practiceNo].Player.Rotation));
 
- 	playerOrBot.PlayerPawn.Value.MoveType = MOVETYPE_WALK;
-        playerOrBot.PlayerPawn.Value.ActualMoveType = MOVETYPE_WALK;
+ 	player.PlayerPawn.Value.MoveType = MoveType_t.MOVETYPE_WALK;
+        player.PlayerPawn.Value.ActualMoveType = MoveType_t.MOVETYPE_WALK;
     }
 
     private void RemoveBots(CCSPlayerController player)
