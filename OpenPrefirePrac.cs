@@ -316,9 +316,7 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
-		playerOrBot.PlayerPawn.Value.MoveType = MoveType_t.MOVETYPE_NONE;
-            	playerOrBot.PlayerPawn.Value.ActualMoveType = MoveType_t.MOVETYPE_NONE;
-	     
+	     SetMoveType(playerOrBot, MoveType_t.MOVETYPE_NONE);
             // For players: Set them up if they are practicing.
             if (!_playerStatuses.ContainsKey(playerOrBot))
                 return HookResult.Continue;
@@ -331,6 +329,14 @@ public class OpenPrefirePrac : BasePlugin
 
         return HookResult.Continue;
     }
+
+	static void SetMoveType(CCSPlayerController player, MoveType_t nMoveType)
+        {
+            if (!player.IsValid) return;
+
+            player.PlayerPawn.Value.MoveType = nMoveType; // necessary to maintain client prediction
+            player.PlayerPawn.Value.ActualMoveType = nMoveType;
+        }
 
     [GameEventHandler]
     public HookResult OnPlayerDeath(EventPlayerDeath @event, GameEventInfo info)
@@ -781,9 +787,7 @@ public class OpenPrefirePrac : BasePlugin
             AddTimer(0.5f, () => SetPlayerHealth(player, 500));
         AddTimer(1f, () => EquipPlayer(player));
         AddTimer(1.5f, () => MovePlayer(player, false, _practices[practiceNo].Player.Position, _practices[practiceNo].Player.Rotation));
-
- 	player.PlayerPawn.Value.MoveType = MoveType_t.MOVETYPE_WALK;
-        player.PlayerPawn.Value.ActualMoveType = MoveType_t.MOVETYPE_WALK;
+	SetMoveType(player, MoveType_t.MOVETYPE_WALK);
     }
 
     private void RemoveBots(CCSPlayerController player)
