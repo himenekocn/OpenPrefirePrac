@@ -200,14 +200,15 @@ public class OpenPrefirePrac : BasePlugin
     public HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
     {
         var player = @event.Userid;
-	//if (player.IsValid && !player.IsBot && !player.IsHLTV)
-        //{
+	if (player.IsValid && !player.IsBot && !player.IsHLTV)
+        {
  	//	_SerplayerCount--;
    	//}
-    	Console.WriteLine($"[HIME] =======================================.");
-    	int playercount = GetOnlinePlayers().Count();
-	Console.WriteLine($"[HIME] Disconnect Get Players Count {playercount}.");
- 	Console.WriteLine($"[HIME] =======================================.");
+    		Console.WriteLine($"[HIME] =======================================.");
+    		int playercount = GetOnlinePlayers().Count();
+		Console.WriteLine($"[HIME] Disconnect Get Players Count {playercount}.");
+ 		Console.WriteLine($"[HIME] =======================================.");
+ 	}
 
         if (!_playerStatuses.ContainsKey(player))
             return HookResult.Continue;
