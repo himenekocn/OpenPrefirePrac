@@ -95,6 +95,23 @@ public class OpenPrefirePrac : BasePlugin
  	RegisterListener<Listeners.OnTick>(PlayerOnTick);
     }
 
+    	public void PlayerOnTick()
+	{
+            	try
+            	{
+                	foreach (CCSPlayerController player in connectedPlayers.Values)
+                	{
+                    		if (player == null || !player.IsValid || player.Slot == null || player.IsHLTV || player.IsBot) continue;
+
+				if(_playerStatuses[player].Progress <= 0)
+    				{
+					player.PrintToCenter("使用 !prefire 开始训练");
+   				}
+
+      			}
+      		}
+      	}
+
 	 public static List<CCSPlayerController> GetOnlinePlayers()
         {
             List<CCSPlayerController> players = new();
