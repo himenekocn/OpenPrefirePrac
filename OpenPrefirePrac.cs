@@ -54,7 +54,7 @@ public class OpenPrefirePrac : BasePlugin
 
         _translator = new Translator(Localizer, ModuleDirectory, CultureInfo.CurrentCulture.Name);
         
-	Console.WriteLine("[OpenPrefirePrac] Registering listeners.");
+	Console.WriteLine("[HIME] Registering listeners.");
         RegisterListener<Listeners.OnClientPutInServer>(OnClientPutInServerHandler);
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
 
@@ -160,39 +160,39 @@ public class OpenPrefirePrac : BasePlugin
                     // Put this bot under management
                     _playerStatuses[tmpPlayerNumBots.Key].Bots.Add(player);
                     _ownerOfBots.Add(player, tmpPlayerNumBots.Key);
-                    Console.WriteLine($"[OpenPrefirePrac] Bot {player.PlayerName}, slot: {player.Slot} has been spawned.");
+                    Console.WriteLine($"[HIME] Bot {player.PlayerName}, slot: {player.Slot} has been spawned.");
                 }
                 else
                 {
                     // Already have enough bots, kick this bot.
                     Server.ExecuteCommand($"bot_kick {player.PlayerName}");
-                    Console.WriteLine($"[OpenPrefirePrac] Exec command: bot_kick {player.PlayerName}");
+                    Console.WriteLine($"[HIME] Exec command: bot_kick {player.PlayerName}");
                 }
             }
         }
         else
         {
 		int playercount = GetOnlinePlayers().Count();
-  		Console.WriteLine($"[OpenPrefirePrac] =======================================.");
-		Console.WriteLine($"[OpenPrefirePrac] Connect Get Players Count {playercount}.");
+  		Console.WriteLine($"[HIME] =======================================.");
+		Console.WriteLine($"[HIME] Connect Get Players Count {playercount}.");
   		foreach (var players in GetOnlinePlayers().Where(players => players is { IsValid: true, IsBot: false, IsHLTV: false }))
             	{
-	     		Console.WriteLine($"[OpenPrefirePrac] OnlinePlayer: {players.PlayerName}.");
+	     		Console.WriteLine($"[HIME] OnlinePlayer: {players.PlayerName}.");
             	}
 		if(playercount > 3)
   		{
-    			Console.WriteLine($"[OpenPrefirePrac] Full Player kick {player.PlayerName}.");
+    			Console.WriteLine($"[HIME] Full Player kick {player.PlayerName}.");
     			Server.ExecuteCommand($"kickid {player.UserId}");
   		}else{
     		//_SerplayerCount++;
-      		//Console.WriteLine($"[OpenPrefirePrac] Join Get Players Count Renew {_SerplayerCount}.");
+      		//Console.WriteLine($"[HIME] Join Get Players Count Renew {_SerplayerCount}.");
             	// For players:
             	_playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
 		
             	// Record player language
             	_translator!.RecordPlayerCulture(player);
 	    	}
-      		Console.WriteLine($"[OpenPrefirePrac] =======================================.");
+      		Console.WriteLine($"[HIME] =======================================.");
         }
     }
 
@@ -204,10 +204,10 @@ public class OpenPrefirePrac : BasePlugin
         //{
  	//	_SerplayerCount--;
    	//}
-    	Console.WriteLine($"[OpenPrefirePrac] =======================================.");
+    	Console.WriteLine($"[HIME] =======================================.");
     	int playercount = GetOnlinePlayers().Count();
-	Console.WriteLine($"[OpenPrefirePrac] Disconnect Get Players Count {playercount}.");
- 	Console.WriteLine($"[OpenPrefirePrac] =======================================.");
+	Console.WriteLine($"[HIME] Disconnect Get Players Count {playercount}.");
+ 	Console.WriteLine($"[HIME] =======================================.");
 
         if (!_playerStatuses.ContainsKey(player))
             return HookResult.Continue;
@@ -232,13 +232,13 @@ public class OpenPrefirePrac : BasePlugin
         for (var i = 0; i < mapDirectories.Count; i++)
         {
             var mapPath = mapDirectories[i].Substring(mapDirectories[i].LastIndexOf(Path.DirectorySeparatorChar) + 1);
-            // Console.WriteLine($"[OpenPrefirePrac] Map folder for map {mapPath} found.");
+            // Console.WriteLine($"[HIME] Map folder for map {mapPath} found.");
             _availableMaps.Add(mapPath);
 
             if (mapPath.Equals(_mapName))
             {
                 found = true;
-                Console.WriteLine("[OpenPrefirePrac] Map folder for current map found.");
+                Console.WriteLine("[HIME] Map folder for current map found.");
             }
         }
 
@@ -248,7 +248,7 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
-            Console.WriteLine("[OpenPrefirePrac] Failed to load practices on map " + _mapName);
+            Console.WriteLine("[HIME] Failed to load practices on map " + _mapName);
         }
     }
 
@@ -301,7 +301,7 @@ public class OpenPrefirePrac : BasePlugin
                     {
                         // Practice finished.
                         owner.PrintToChat(
-                            $" {ChatColors.Green}[OpenPrefirePrac] {ChatColors.White}{_translator!.Translate(owner, "practice.finish")}");
+                            $" {ChatColors.Green}[HIME] {ChatColors.White}{_translator!.Translate(owner, "practice.finish")}");
                         ExitPrefireMode(owner);
                     }
                 }
@@ -309,7 +309,7 @@ public class OpenPrefirePrac : BasePlugin
             // else
             // {
             //     // For unmanaged bots, kick them.
-            //     Console.WriteLine($"[OpenPrefirePrac] Find an unmanaged bot ({playerOrBot.PlayerName}) spawning, kick it.");
+            //     Console.WriteLine($"[HIME] Find an unmanaged bot ({playerOrBot.PlayerName}) spawning, kick it.");
             //     Server.ExecuteCommand($"bot_kick {playerOrBot.PlayerName}");
             // }
         }
@@ -388,7 +388,7 @@ public class OpenPrefirePrac : BasePlugin
                     if (_playerStatuses[owner].Bots.Count == 0)
                     {
                         // Practice finished.
-                        owner.PrintToChat($" {ChatColors.Green}[OpenPrefirePrac] {ChatColors.White}{_translator!.Translate(owner, "practice.finish")}");
+                        owner.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White}{_translator!.Translate(owner, "practice.finish")}");
                         ExitPrefireMode(owner);
                     }
                 }
@@ -406,7 +406,7 @@ public class OpenPrefirePrac : BasePlugin
             // else
             // {
             //     // For unmanaged bots, kick them.
-            //     Console.WriteLine($"[OpenPrefirePrac] Find an unmanaged bot ({playerOrBot.PlayerName}) dying, kick it.");
+            //     Console.WriteLine($"[HIME] Find an unmanaged bot ({playerOrBot.PlayerName}) dying, kick it.");
             //     Server.ExecuteCommand($"bot_kick {playerOrBot.PlayerName}");
             // }
         }
@@ -444,7 +444,7 @@ public class OpenPrefirePrac : BasePlugin
         mainMenu.AddMenuOption("Language preference", OpenLanguageMenu);
         mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.exit"), ForceExitPrefireMode);
         
-        player.PrintToChat("============ [OpenPrefirePrac] ============");
+        player.PrintToChat("================== [HIME] =================");
         MenuManager.OpenChatMenu(player, mainMenu);
         player.PrintToChat("===========================================");
     }
@@ -463,7 +463,7 @@ public class OpenPrefirePrac : BasePlugin
         // Check if selected practice route is compatible with other on-playing routes.
         if (previousPracticeNo != practiceNo && !_practiceEnabled[practiceNo])
         {
-            player.PrintToChat($" {ChatColors.Green}[OpenPrefirePrac] {ChatColors.White}{_translator!.Translate(player, "practice.incompatible")}");
+            player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White}{_translator!.Translate(player, "practice.incompatible")}");
             return;
         }
 
@@ -525,7 +525,7 @@ public class OpenPrefirePrac : BasePlugin
         // Practice begin
         SetupPrefireMode(player);
         var localizedPracticeName = _translator!.Translate(player, "map." + _mapName + "." + _practices[practiceNo].PracticeName);
-        player.PrintToChat($" {ChatColors.Green}[OpenPrefirePrac] {ChatColors.White} {_translator.Translate(player, "practice.choose", localizedPracticeName)}");
+        player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White} {_translator.Translate(player, "practice.choose", localizedPracticeName)}");
         player.PrintToCenterHtml(_translator.Translate(player, "practice.begin"));
     }
 
@@ -533,7 +533,7 @@ public class OpenPrefirePrac : BasePlugin
     {
         ExitPrefireMode(player);
         
-        player.PrintToChat($" {ChatColors.Green}[OpenPrefirePrac] {ChatColors.White}{_translator!.Translate(player, "practice.exit")}");
+        player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White}{_translator!.Translate(player, "practice.exit")}");
     }
 
     public void OpenMapMenu(CCSPlayerController player, ChatMenuOption option)
@@ -544,7 +544,7 @@ public class OpenPrefirePrac : BasePlugin
             mapMenu.AddMenuOption(map, ChangeMap);
         }
 
-        player.PrintToChat("============ [OpenPrefirePrac] ============");
+        player.PrintToChat("================== [HIME] =================");
         MenuManager.OpenChatMenu(player, mapMenu);
         player.PrintToChat("===========================================");
     }
@@ -558,7 +558,7 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
-            player.PrintToChat($" {ChatColors.Green}[OpenPrefirePrac] {ChatColors.White}{_translator!.Translate(player, "mapmenu.busy")}");
+            player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White}{_translator!.Translate(player, "mapmenu.busy")}");
         }
     }
 
@@ -586,7 +586,7 @@ public class OpenPrefirePrac : BasePlugin
         }
 
 
-        player.PrintToChat("============ [OpenPrefirePrac] ============");
+        player.PrintToChat("================== [HIME] =================");
         MenuManager.OpenChatMenu(player, practiceMenu);
         player.PrintToChat("===========================================");
     }
@@ -604,7 +604,7 @@ public class OpenPrefirePrac : BasePlugin
             difficultyMenu.AddMenuOption(tmpLocalizedDifficultyName, OnDifficultyChosen); // practice name here is split by space instead of underline. TODO: Use localized text.
         }
 
-        player.PrintToChat("============ [OpenPrefirePrac] ============");
+        player.PrintToChat("================== [HIME] =================");
         MenuManager.OpenChatMenu(player, difficultyMenu);
         player.PrintToChat("===========================================");
     }
@@ -614,7 +614,7 @@ public class OpenPrefirePrac : BasePlugin
         var difficultyNo = _playerStatuses[player].LocalizedDifficultyNames[option.Text];
         _playerStatuses[player].HealingMethod = difficultyNo;
         var currentDifficulty = _translator!.Translate(player, $"difficulty.{difficultyNo}");
-        player.PrintToChat($" {ChatColors.Green}[OpenPrefirePrac] {ChatColors.White} {_translator.Translate(player, "difficulty.set", currentDifficulty)}");
+        player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White} {_translator.Translate(player, "difficulty.set", currentDifficulty)}");
     }
 
     public void OpenModeMenu(CCSPlayerController player, ChatMenuOption option)
@@ -629,7 +629,7 @@ public class OpenPrefirePrac : BasePlugin
             trainingModeMenu.AddMenuOption(tmpLocalizedTrainingModeName, OnModeChosen);
         }
 
-        player.PrintToChat("============ [OpenPrefirePrac] ============");
+        player.PrintToChat("================== [HIME] =================");
         MenuManager.OpenChatMenu(player, trainingModeMenu);
         player.PrintToChat("===========================================");
     }
@@ -639,7 +639,7 @@ public class OpenPrefirePrac : BasePlugin
         var trainingModeNo = _playerStatuses[player].LocalizedTrainingModeNames[option.Text];
         _playerStatuses[player].TrainingMode = trainingModeNo;
         var currentTrainingMode = _translator!.Translate(player, $"modemenu.{trainingModeNo}");
-        player.PrintToChat($" {ChatColors.Green}[OpenPrefirePrac] {ChatColors.White} {_translator!.Translate(player, "modemenu.set", currentTrainingMode)}");
+        player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White} {_translator!.Translate(player, "modemenu.set", currentTrainingMode)}");
     }
 
     public void OpenLanguageMenu(CCSPlayerController player, ChatMenuOption option)
@@ -651,7 +651,7 @@ public class OpenPrefirePrac : BasePlugin
         languageMenu.AddMenuOption("Português", OnLanguageChosen);
         languageMenu.AddMenuOption("中文", OnLanguageChosen);
 
-        player.PrintToChat("============ [OpenPrefirePrac] ============");
+        player.PrintToChat("================== [HIME] =================");
         MenuManager.OpenChatMenu(player, languageMenu);
         player.PrintToChat("===========================================");
     }
@@ -674,12 +674,12 @@ public class OpenPrefirePrac : BasePlugin
                 break;
         }
 
-        player.PrintToChat($" {ChatColors.Green}[OpenPrefirePrac] {ChatColors.White} {_translator!.Translate(player, "languagemenu.set")}");
+        player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White} {_translator!.Translate(player, "languagemenu.set")}");
     }
 
     private void LoadPractice()
     {
-        Console.WriteLine($"[OpenPrefirePrac] Loading practices for map {_mapName}.");
+        Console.WriteLine($"[HIME] Loading practices for map {_mapName}.");
         var practiceFiles = new List<string>(Directory.EnumerateFiles($"{ModuleDirectory}/maps/{_mapName}"));
         _practices.Clear();
         _practiceNameToId.Clear();
@@ -690,7 +690,7 @@ public class OpenPrefirePrac : BasePlugin
             _practices.Add(new PrefirePractice(ModuleDirectory, _mapName, practiceName));
             _practiceNameToId.Add(practiceName, i);
             _practiceEnabled.Add(i, true);
-            Console.WriteLine($"[OpenPrefirePrac] {_mapName} {practiceName} Loaded.");
+            Console.WriteLine($"[HIME] {_mapName} {practiceName} Loaded.");
         }
     }
     
@@ -757,7 +757,7 @@ public class OpenPrefirePrac : BasePlugin
             }
             else
             {
-                Console.WriteLine($"[OpenPrefirePrac] Error: Player has an invalid bot.(slot: {i})");
+                Console.WriteLine($"[HIME] Error: Player has an invalid bot.(slot: {i})");
             }
         }
     }
@@ -789,7 +789,7 @@ public class OpenPrefirePrac : BasePlugin
             }
             else
             {
-                Console.WriteLine($"[OpenPrefirePrac] Trying to kick an invalid bot.");
+                Console.WriteLine($"[HIME] Trying to kick an invalid bot.");
             }
             _ownerOfBots.Remove(bot);
         }
@@ -799,7 +799,7 @@ public class OpenPrefirePrac : BasePlugin
 
     private void AddBot(CCSPlayerController player, int numberOfBots)
     {
-        Console.WriteLine($"[OpenPrefirePrac] Creating {numberOfBots} bots.");
+        Console.WriteLine($"[HIME] Creating {numberOfBots} bots.");
 
         // Test a new method of adding bots
         _botRequests.Add(player, numberOfBots);
@@ -836,7 +836,7 @@ public class OpenPrefirePrac : BasePlugin
         //         {
         //             // a redundent bot, kick it
         //             Server.ExecuteCommand($"bot_kick {tempPlayer.PlayerName}");
-        //             Console.WriteLine($"[OpenPrefirePrac] Exec command: bot_kick {tempPlayer.PlayerName}");
+        //             Console.WriteLine($"[HIME] Exec command: bot_kick {tempPlayer.PlayerName}");
         //             continue;
         //         }
 
@@ -845,7 +845,7 @@ public class OpenPrefirePrac : BasePlugin
 
         //         numberBotToFind--;
                     
-        //         Console.WriteLine($"[OpenPrefirePrac] Bot {tempPlayer.PlayerName}, slot: {tempPlayer.Slot} has been spawned.");
+        //         Console.WriteLine($"[HIME] Bot {tempPlayer.PlayerName}, slot: {tempPlayer.Slot} has been spawned.");
         //     }
         // });
     }
@@ -934,7 +934,7 @@ public class OpenPrefirePrac : BasePlugin
 
         if (practiceNo < 0 || practiceNo >= _practices.Count)
         {
-            Console.WriteLine($"[OpenPrefirePrac] Error when creating guiding line. Current practice_no illegal. (practice_no = {practiceNo})");
+            Console.WriteLine($"[HIME] Error when creating guiding line. Current practice_no illegal. (practice_no = {practiceNo})");
             return;
         }
 
@@ -961,7 +961,7 @@ public class OpenPrefirePrac : BasePlugin
 
             if (beam == null || !beam.IsValid)
             {
-                Console.WriteLine($"[OpenPrefirePrac] Error when deleting guiding line. Failed to get beam entity(index = {_playerStatuses[player].Beams[i]})");
+                Console.WriteLine($"[HIME] Error when deleting guiding line. Failed to get beam entity(index = {_playerStatuses[player].Beams[i]})");
                 continue;
             }
 
@@ -977,7 +977,7 @@ public class OpenPrefirePrac : BasePlugin
         if (beam == null)
         {
             // Failed to create beam
-            Console.WriteLine($"[OpenPrefirePrac] Failed to create beam. Start position: {startPos}, end position: {endPos}");
+            Console.WriteLine($"[HIME] Failed to create beam. Start position: {startPos}, end position: {endPos}");
             return -1;
         }
 
@@ -988,7 +988,7 @@ public class OpenPrefirePrac : BasePlugin
         beam.EndPos.Add(endPos);
         beam.DispatchSpawn();
 
-        // Console.WriteLine($"[OpenPrefirePrac] Created a beam. Start position: {startPos}, end position: {endPos}, entity index: {beam.Index}");
+        // Console.WriteLine($"[HIME] Created a beam. Start position: {startPos}, end position: {endPos}, entity index: {beam.Index}");
         return (int)beam.Index;
     }
 
@@ -1051,7 +1051,7 @@ public class OpenPrefirePrac : BasePlugin
                 {
                     var value = tmpConvar.GetPrimitiveValue<bool>();
                     _serverStatus.BoolConvars.Add(convarName, value);
-                    // Console.WriteLine($"[OpenPrefirePrac] {convarName}: {value}");
+                    // Console.WriteLine($"[HIME] {convarName}: {value}");
                 }
             }
 
@@ -1063,7 +1063,7 @@ public class OpenPrefirePrac : BasePlugin
                 {
                     var value = tmpConvar.GetPrimitiveValue<int>();
                     _serverStatus.IntConvars.Add(convarName, value);
-                    // Console.WriteLine($"[OpenPrefirePrac] {convarName}: {value}");
+                    // Console.WriteLine($"[HIME] {convarName}: {value}");
                 }
             }
 
@@ -1075,7 +1075,7 @@ public class OpenPrefirePrac : BasePlugin
                 {
                     var value = tmpConvar.GetPrimitiveValue<float>();
                     _serverStatus.FloatConvars.Add(convarName, value);
-                    // Console.WriteLine($"[OpenPrefirePrac] {convarName}: {value}");
+                    // Console.WriteLine($"[HIME] {convarName}: {value}");
                 }
             }
 
@@ -1087,13 +1087,13 @@ public class OpenPrefirePrac : BasePlugin
                 {
                     var value = tmpConvar.StringValue;
                     _serverStatus.StringConvars.Add(convarName, value);
-                    // Console.WriteLine($"[OpenPrefirePrac] {convarName}: {value}");
+                    // Console.WriteLine($"[HIME] {convarName}: {value}");
                 }
             }
         }
         catch (System.Exception)
         {
-            Console.WriteLine("[OpenPrefirePrac] Error reading convars.");
+            Console.WriteLine("[HIME] Error reading convars.");
             throw;
         }
 
@@ -1105,14 +1105,14 @@ public class OpenPrefirePrac : BasePlugin
                 _serverGameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules!;
             }
             _serverStatus.WarmupStatus = _serverGameRules.WarmupPeriod;
-            // Console.WriteLine($"[OpenPrefirePrac] Warmup Status: {_serverGameRules.WarmupPeriod}");
+            // Console.WriteLine($"[HIME] Warmup Status: {_serverGameRules.WarmupPeriod}");
         }
         catch (System.Exception)
         {
-            Console.WriteLine($"[OpenPrefirePrac] Can't read server's warmup status, will use the default value {_serverStatus.WarmupStatus}.");
+            Console.WriteLine($"[HIME] Can't read server's warmup status, will use the default value {_serverStatus.WarmupStatus}.");
         }
 
-        Console.WriteLine("[OpenPrefirePrac] Values of convars saved.");
+        Console.WriteLine("[HIME] Values of convars saved.");
     }
 
     private void RestoreConvars()
@@ -1168,7 +1168,7 @@ public class OpenPrefirePrac : BasePlugin
         //    Server.ExecuteCommand("mp_warmup_end");
         //}
 
-        Console.WriteLine("[OpenPrefirePrac] Values of convars restored.");
+        Console.WriteLine("[HIME] Values of convars restored.");
     }
 
     private void SetupConvars()
@@ -1214,7 +1214,7 @@ public class OpenPrefirePrac : BasePlugin
         // Server.ExecuteCommand("mp_respawn_on_death_ct 1");
         // Server.ExecuteCommand("mp_respawn_on_death_t 1");
 
-        Console.WriteLine("[OpenPrefirePrac] Values of convars set.");
+        Console.WriteLine("[HIME] Values of convars set.");
     }
 
     private void RefillAmmo(CCSPlayerController player)
@@ -1288,7 +1288,7 @@ public class OpenPrefirePrac : BasePlugin
         if (!File.Exists(path))
         {
             // Use default settings
-            Console.WriteLine("[OpenPrefirePrac] No default settings provided. Will use default settings.");
+            Console.WriteLine("[HIME] No default settings provided. Will use default settings.");
         }
         else
         {
@@ -1308,11 +1308,11 @@ public class OpenPrefirePrac : BasePlugin
                 tmpDifficulty = jsonConfig.Difficulty;
                 tmpTrainingMode = jsonConfig.TrainingMode;
 
-                Console.WriteLine($"[OpenPrefirePrac] Successfully load default settings. Difficulty = {tmpDifficulty}, TrainingMode = {tmpTrainingMode}");
+                Console.WriteLine($"[HIME] Successfully load default settings. Difficulty = {tmpDifficulty}, TrainingMode = {tmpTrainingMode}");
             }
             catch (System.Exception)
             {
-                Console.WriteLine("[OpenPrefirePrac] Failed to load default settings. Will use default settings.");
+                Console.WriteLine("[HIME] Failed to load default settings. Will use default settings.");
             }
         }
 
