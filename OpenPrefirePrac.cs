@@ -97,18 +97,14 @@ public class OpenPrefirePrac : BasePlugin
 
     	public void PlayerOnTick()
 	{
-            	try
-            	{
-                	foreach (CCSPlayerController player in connectedPlayers.Values)
-                	{
-                    		if (player == null || !player.IsValid || player.Slot == null || player.IsHLTV || player.IsBot) continue;
+                foreach (CCSPlayerController player in connectedPlayers.Values)
+                {
+                    	if (player == null || !player.IsValid || player.Slot == null || player.IsHLTV || player.IsBot) continue;
 
-				if(_playerStatuses[player].Progress <= 0)
-    				{
-					player.PrintToCenter("使用 !prefire 开始训练");
-   				}
-
-      			}
+			if(_playerStatuses[player].Progress <= 0)
+    			{
+				player.PrintToCenter("使用 !prefire 开始训练");
+   			}
       		}
       	}
 
