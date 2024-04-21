@@ -106,8 +106,13 @@ public class OpenPrefirePrac : BasePlugin
             	{
                 	if(_playerStatuses[player].PracticeIndex == -1)
     			{
+       				SetMoveType(player, MoveType_t.MOVETYPE_NONE);
 				player.PrintToCenter("使用 !prefire 开始训练 \n当前无法移动");
    			}
+      			else
+	 		{
+				player.PrintToCenter(_translator!.Translate(player, "practice.progress", _playerStatuses[player].EnabledTargets.Count, _playerStatuses[player].EnabledTargets.Count - targetNo + _playerStatuses[player].Bots.Count - 1));
+			}
             	}
       	}
 
@@ -257,7 +262,6 @@ public class OpenPrefirePrac : BasePlugin
     public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
     {
         var playerOrBot = @event.Userid;
-	CCSPlayerController? player = playerOrBot;
         
         if (!playerOrBot.IsValid || playerOrBot.IsHLTV)
         {
@@ -317,7 +321,6 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
-	     SetMoveType(player, MoveType_t.MOVETYPE_NONE);
             // For players: Set them up if they are practicing.
             if (!_playerStatuses.ContainsKey(playerOrBot))
                 return HookResult.Continue;
@@ -386,7 +389,7 @@ public class OpenPrefirePrac : BasePlugin
                     }
 
                     // Print progress
-                    owner.PrintToCenter(_translator!.Translate(owner, "practice.progress", _playerStatuses[owner].EnabledTargets.Count, _playerStatuses[owner].EnabledTargets.Count - targetNo + _playerStatuses[owner].Bots.Count - 1));
+                   // owner.PrintToCenter(_translator!.Translate(owner, "practice.progress", _playerStatuses[owner].EnabledTargets.Count, _playerStatuses[owner].EnabledTargets.Count - targetNo + _playerStatuses[owner].Bots.Count - 1));
                 }
 
                 // Kick unnecessary bots
