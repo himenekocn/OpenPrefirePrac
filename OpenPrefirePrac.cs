@@ -100,7 +100,7 @@ public class OpenPrefirePrac : BasePlugin
  		foreach (var player in Utilities.GetPlayers()
                          .Where(player => player is { IsValid: true, IsBot: false, PawnIsAlive: true, IsHLTV: false }))
             	{
-                	if(_playerStatuses[player].PracticeIndex != -1)
+                	if(_playerStatuses[player].PracticeIndex == -1)
     			{
 				player.PrintToCenter("使用 !prefire 开始训练");
    			}
