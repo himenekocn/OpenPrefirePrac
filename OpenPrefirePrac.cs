@@ -101,7 +101,7 @@ public class OpenPrefirePrac : BasePlugin
                 {
                     	if (player == null || !player.IsValid || player.Slot == null || player.IsHLTV || player.IsBot) continue;
 
-			if(_playerStatuses[player].Progress <= 0)
+			if(_playerStatuses[player].PracticeIndex != -1)
     			{
 				player.PrintToCenter("使用 !prefire 开始训练");
    			}
