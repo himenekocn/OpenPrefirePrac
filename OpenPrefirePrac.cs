@@ -173,12 +173,14 @@ public class OpenPrefirePrac : BasePlugin
         else
         {
 		//int playercount = GetOnlinePlayers().Count();
-		Console.WriteLine($"[OpenPrefirePrac] Players Count {_SerplayerCount}.");
-		if(_SerplayerCount > 3)
+		Console.WriteLine($"[OpenPrefirePrac] Join Get Players Count {_SerplayerCount}.");
+		if(_SerplayerCount == 3)
   		{
     			Server.ExecuteCommand($"kickid {player.UserId}");
+       			Console.WriteLine($"[OpenPrefirePrac] Full Player kick {player.PlayerName}.");
   		}else{
     		_SerplayerCount++;
+      		Console.WriteLine($"[OpenPrefirePrac] Join Get Players Count Renew {_SerplayerCount}.");
             	// For players:
             	_playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
 
