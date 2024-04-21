@@ -106,7 +106,7 @@ public class OpenPrefirePrac : BasePlugin
             	{
                 	if(_playerStatuses[player].PracticeIndex == -1)
     			{
-				player.PrintToCenter("使用 !prefire 开始训练");
+				player.PrintToCenter("<font color='skyblue' class='fontSize-s horizontal-center'>使用</font> <font class='fontSize-l horizontal-center' color='red'>!prefire</font> <font color='skyblue' class='fontSize-s horizontal-center'>开始训练</font><br><font color='gray' class='fontSize-s horizontal-center'>当前无法移动</font>");
    			}
             	}
       	}
@@ -188,7 +188,7 @@ public class OpenPrefirePrac : BasePlugin
       		//Console.WriteLine($"[HIME] Join Get Players Count Renew {_SerplayerCount}.");
             	// For players:
             	_playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
-		
+	     
             	// Record player language
             	_translator!.RecordPlayerCulture(player);
 	    	}
@@ -315,6 +315,9 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
+		playerOrBot.PlayerPawn.Value.MoveType = MOVETYPE_NONE;
+            	playerOrBot.PlayerPawn.Value.ActualMoveType = MOVETYPE_NONE;
+	     
             // For players: Set them up if they are practicing.
             if (!_playerStatuses.ContainsKey(playerOrBot))
                 return HookResult.Continue;
@@ -375,7 +378,7 @@ public class OpenPrefirePrac : BasePlugin
                     }
 
                     // Print progress
-                    owner.PrintToCenterHtml(_translator!.Translate(owner, "practice.progress", _playerStatuses[owner].EnabledTargets.Count, _playerStatuses[owner].EnabledTargets.Count - targetNo + _playerStatuses[owner].Bots.Count - 1));
+                    owner.PrintToCenter(_translator!.Translate(owner, "practice.progress", _playerStatuses[owner].EnabledTargets.Count, _playerStatuses[owner].EnabledTargets.Count - targetNo + _playerStatuses[owner].Bots.Count - 1));
                 }
 
                 // Kick unnecessary bots
@@ -526,7 +529,7 @@ public class OpenPrefirePrac : BasePlugin
         SetupPrefireMode(player);
         var localizedPracticeName = _translator!.Translate(player, "map." + _mapName + "." + _practices[practiceNo].PracticeName);
         player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White} {_translator.Translate(player, "practice.choose", localizedPracticeName)}");
-        player.PrintToCenterHtml(_translator.Translate(player, "practice.begin"));
+        player.PrintToCenter(_translator.Translate(player, "practice.begin"));
     }
 
     public void ForceExitPrefireMode(CCSPlayerController player, ChatMenuOption option)
@@ -777,6 +780,9 @@ public class OpenPrefirePrac : BasePlugin
             AddTimer(0.5f, () => SetPlayerHealth(player, 500));
         AddTimer(1f, () => EquipPlayer(player));
         AddTimer(1.5f, () => MovePlayer(player, false, _practices[practiceNo].Player.Position, _practices[practiceNo].Player.Rotation));
+
+ 	playerOrBot.PlayerPawn.Value.MoveType = MOVETYPE_WALK;
+        playerOrBot.PlayerPawn.Value.ActualMoveType = MOVETYPE_WALK;
     }
 
     private void RemoveBots(CCSPlayerController player)
