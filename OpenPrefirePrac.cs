@@ -70,7 +70,7 @@ public class OpenPrefirePrac : BasePlugin
             _playerStatuses.Clear();
             
             // Clear saved convars
-            _serverStatus.WarmupStatus = false;
+            _serverStatus.WarmupStatus = true;
             _serverStatus.BoolConvars.Clear();
             _serverStatus.IntConvars.Clear();
             _serverStatus.FloatConvars.Clear();
@@ -316,7 +316,7 @@ public class OpenPrefirePrac : BasePlugin
                     }
 
                     // Print progress
-                    owner.PrintToCenter(_translator!.Translate(owner, "practice.progress", _playerStatuses[owner].EnabledTargets.Count, _playerStatuses[owner].EnabledTargets.Count - targetNo + _playerStatuses[owner].Bots.Count - 1));
+                    owner.PrintToCenterHtml(_translator!.Translate(owner, "practice.progress", _playerStatuses[owner].EnabledTargets.Count, _playerStatuses[owner].EnabledTargets.Count - targetNo + _playerStatuses[owner].Bots.Count - 1));
                 }
 
                 // Kick unnecessary bots
@@ -467,7 +467,7 @@ public class OpenPrefirePrac : BasePlugin
         SetupPrefireMode(player);
         var localizedPracticeName = _translator!.Translate(player, "map." + _mapName + "." + _practices[practiceNo].PracticeName);
         player.PrintToChat($" {ChatColors.Green}[OpenPrefirePrac] {ChatColors.White} {_translator.Translate(player, "practice.choose", localizedPracticeName)}");
-        player.PrintToCenter(_translator.Translate(player, "practice.begin"));
+        player.PrintToCenterHtml(_translator.Translate(player, "practice.begin"));
     }
 
     public void ForceExitPrefireMode(CCSPlayerController player, ChatMenuOption option)
@@ -923,7 +923,7 @@ public class OpenPrefirePrac : BasePlugin
         }
 
         beam.Render = System.Drawing.Color.Blue;
-        beam.Width = 2.0f;
+        beam.Width = 2.2f;
 
         beam.Teleport(startPos, new QAngle(0, 0, 0), new Vector(0, 0, 0));
         beam.EndPos.Add(endPos);
@@ -1104,10 +1104,10 @@ public class OpenPrefirePrac : BasePlugin
         // Server.ExecuteCommand("sv_cheats " + _serverStatus.sv_cheats.ToString());
 
         // Restore warmup status
-        if (!_serverStatus.WarmupStatus)
-        {
-            Server.ExecuteCommand("mp_warmup_end");
-        }
+        //if (!_serverStatus.WarmupStatus)
+        //{
+        //    Server.ExecuteCommand("mp_warmup_end");
+        //}
 
         Console.WriteLine("[OpenPrefirePrac] Values of convars restored.");
     }
