@@ -99,6 +99,13 @@ public class OpenPrefirePrac : BasePlugin
  	RegisterListener<Listeners.OnTick>(PlayerOnTick);
     }
 
+	private void SetPlayerClanTag(CCSPlayerController? player)
+	{
+		if (player == null || !player.IsValid || !player.IsBot || player.IsHLTV) return;
+  
+		player.Clan = "HIME-BOT";
+ 	}
+
     	public void PlayerOnTick()
 	{
  		foreach (var player in Utilities.GetPlayers()
@@ -170,6 +177,7 @@ public class OpenPrefirePrac : BasePlugin
                     _playerStatuses[tmpPlayerNumBots.Key].Bots.Add(player);
                     _ownerOfBots.Add(player, tmpPlayerNumBots.Key);
                     Console.WriteLine($"[HIME] Bot {player.PlayerName}, slot: {player.Slot} has been spawned.");
+		    AddTimer(1.0f, () => SetPlayerClanTag(player));
                 }
                 else
                 {
@@ -295,6 +303,7 @@ public class OpenPrefirePrac : BasePlugin
                             .Rotation);
                     
                     Server.NextFrame(() => FreezeBot(playerOrBot));
+		    AddTimer(1.0f, () => SetPlayerClanTag(player));
                 }
                 else
                 {
