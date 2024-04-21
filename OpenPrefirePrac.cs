@@ -106,7 +106,7 @@ public class OpenPrefirePrac : BasePlugin
             	{
                 	if(_playerStatuses[player].PracticeIndex == -1)
     			{
-				player.PrintToCenter("<font color='skyblue' class='fontSize-s horizontal-center'>使用</font> <font class='fontSize-l horizontal-center' color='red'>!prefire</font> <font color='skyblue' class='fontSize-s horizontal-center'>开始训练</font><br><font color='gray' class='fontSize-s horizontal-center'>当前无法移动</font>");
+				player.PrintToCenter("使用 !prefire 开始训练 \n当前无法移动");
    			}
             	}
       	}
