@@ -168,7 +168,9 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
-		if(GetOnlinePlayers().Count() > 2)
+		int playercount = GetOnlinePlayers().Count();
+		Console.WriteLine($"[OpenPrefirePrac] Players Count {playercount}.");
+		if(playercount > 2)
   		{
     			Server.ExecuteCommand($"kickid {player.UserId}");
   		}else{
