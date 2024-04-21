@@ -51,7 +51,7 @@ public class OpenPrefirePrac : BasePlugin
 
         _translator = new Translator(Localizer, ModuleDirectory, CultureInfo.CurrentCulture.Name);
         
-	    Console.WriteLine("[OpenPrefirePrac] Registering listeners.");
+	Console.WriteLine("[OpenPrefirePrac] Registering listeners.");
         RegisterListener<Listeners.OnClientPutInServer>(OnClientPutInServerHandler);
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
 
@@ -91,7 +91,26 @@ public class OpenPrefirePrac : BasePlugin
                 OnClientPutInServerHandler(tempPlayer.Slot);    
             }
         }
+
+ 	RegisterListener<Listeners.OnTick>(PlayerOnTick);
     }
+
+	 public static List<CCSPlayerController> GetOnlinePlayers()
+        {
+            List<CCSPlayerController> players = new();
+
+            for (int i = 0; i < Server.MaxPlayers; i++)
+            {
+                var controller = GetPlayerFromSlot(i);
+
+                if (!controller.IsValid || controller.UserId == -1 || controller.IsHLTV || controller.IsBot)
+                    continue;
+
+                players.Add(controller);
+            }
+
+            return players;
+        }
 
     // TODO: Figure out if we can use the GameEventHandler attribute here instead
     // [GameEventHandler]
@@ -137,11 +156,16 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
-            // For players:
-            _playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
+		if(GetOnlinePlayers().Count() > 2)
+  		{
+    			Server.ExecuteCommand($"kickid {player.UserId}");
+  		}else{
+            	// For players:
+            	_playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
 
-            // Record player language
-            _translator!.RecordPlayerCulture(player);
+            	// Record player language
+            	_translator!.RecordPlayerCulture(player);
+	    }
         }
     }
 
