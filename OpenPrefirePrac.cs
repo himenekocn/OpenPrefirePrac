@@ -173,12 +173,13 @@ public class OpenPrefirePrac : BasePlugin
         else
         {
 		int playercount = GetOnlinePlayers().Count();
+  		Console.WriteLine($"[OpenPrefirePrac] =======================================.");
 		Console.WriteLine($"[OpenPrefirePrac] Connect Get Players Count {playercount}.");
   		foreach (var players in GetOnlinePlayers().Where(players => players is { IsValid: true, IsBot: false, IsHLTV: false }))
             	{
 	     		Console.WriteLine($"[OpenPrefirePrac] OnlinePlayer: {players.PlayerName}.");
             	}
-		if(playercount > 2)
+		if(playercount > 3)
   		{
     			Console.WriteLine($"[OpenPrefirePrac] Full Player kick {player.PlayerName}.");
     			Server.ExecuteCommand($"kickid {player.UserId}");
@@ -187,10 +188,11 @@ public class OpenPrefirePrac : BasePlugin
       		//Console.WriteLine($"[OpenPrefirePrac] Join Get Players Count Renew {_SerplayerCount}.");
             	// For players:
             	_playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
-
+		
             	// Record player language
             	_translator!.RecordPlayerCulture(player);
-	    }
+	    	}
+      		Console.WriteLine($"[OpenPrefirePrac] =======================================.");
         }
     }
 
@@ -202,8 +204,10 @@ public class OpenPrefirePrac : BasePlugin
         //{
  	//	_SerplayerCount--;
    	//}
+    	Console.WriteLine($"[OpenPrefirePrac] =======================================.");
     	int playercount = GetOnlinePlayers().Count();
 	Console.WriteLine($"[OpenPrefirePrac] Disconnect Get Players Count {playercount}.");
+ 	Console.WriteLine($"[OpenPrefirePrac] =======================================.");
 
         if (!_playerStatuses.ContainsKey(player))
             return HookResult.Continue;
