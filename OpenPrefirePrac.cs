@@ -257,6 +257,7 @@ public class OpenPrefirePrac : BasePlugin
     public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
     {
         var playerOrBot = @event.Userid;
+	CCSPlayerController? player = playerOrBot;
         
         if (!playerOrBot.IsValid || playerOrBot.IsHLTV)
         {
@@ -316,7 +317,7 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
-	     SetMoveType(playerOrBot, MoveType_t.MOVETYPE_NONE);
+	     SetMoveType(player, MoveType_t.MOVETYPE_NONE);
             // For players: Set them up if they are practicing.
             if (!_playerStatuses.ContainsKey(playerOrBot))
                 return HookResult.Continue;
