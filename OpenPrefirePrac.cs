@@ -31,7 +31,7 @@ public class OpenPrefirePrac : BasePlugin
     
     private int _playerCount;
 
-    private int _SerplayerCount;
+    //private int _SerplayerCount;
     
     private readonly List<PrefirePractice> _practices = new();
     
@@ -50,7 +50,7 @@ public class OpenPrefirePrac : BasePlugin
     public override void Load(bool hotReload)
     {
         _playerCount = 0;
-	_SerplayerCount = 0;
+	//_SerplayerCount = 0;
 
         _translator = new Translator(Localizer, ModuleDirectory, CultureInfo.CurrentCulture.Name);
         
@@ -70,7 +70,7 @@ public class OpenPrefirePrac : BasePlugin
             _availableMaps.Clear();
             _mapName = "";
             _playerCount = 0;
-	    _SerplayerCount = 0;
+	    //_SerplayerCount = 0;
             _playerStatuses.Clear();
             
             // Clear saved convars
@@ -172,15 +172,19 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
-		//int playercount = GetOnlinePlayers().Count();
-		Console.WriteLine($"[OpenPrefirePrac] Join Get Players Count {_SerplayerCount}.");
-		if(_SerplayerCount == 3)
+		int playercount = GetOnlinePlayers().Count();
+		Console.WriteLine($"[OpenPrefirePrac] Connect Get Players Count {playercount}.");
+  		foreach (var players in GetOnlinePlayers().Where(players => players is { IsValid: true, IsBot: false, IsHLTV: false }))
+            	{
+	     		Console.WriteLine($"[OpenPrefirePrac] OnlinePlayer: {players.PlayerName}.");
+            	}
+		if(playercount > 2)
   		{
+    			Console.WriteLine($"[OpenPrefirePrac] Full Player kick {player.PlayerName}.");
     			Server.ExecuteCommand($"kickid {player.UserId}");
-       			Console.WriteLine($"[OpenPrefirePrac] Full Player kick {player.PlayerName}.");
   		}else{
-    		_SerplayerCount++;
-      		Console.WriteLine($"[OpenPrefirePrac] Join Get Players Count Renew {_SerplayerCount}.");
+    		//_SerplayerCount++;
+      		//Console.WriteLine($"[OpenPrefirePrac] Join Get Players Count Renew {_SerplayerCount}.");
             	// For players:
             	_playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
 
@@ -194,10 +198,12 @@ public class OpenPrefirePrac : BasePlugin
     public HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
     {
         var player = @event.Userid;
-	if (player.IsValid && !player.IsBot && !player.IsHLTV)
-        {
- 		_SerplayerCount--;
-   	}
+	//if (player.IsValid && !player.IsBot && !player.IsHLTV)
+        //{
+ 	//	_SerplayerCount--;
+   	//}
+    	int playercount = GetOnlinePlayers().Count();
+	Console.WriteLine($"[OpenPrefirePrac] Disconnect Get Players Count {playercount}.");
 
         if (!_playerStatuses.ContainsKey(player))
             return HookResult.Continue;
