@@ -111,7 +111,7 @@ public class OpenPrefirePrac : BasePlugin
    			}
       			else
 	 		{
-				player.PrintToCenter(_translator!.Translate(player, "practice.progress", _playerStatuses[player].EnabledTargets.Count, _playerStatuses[player].EnabledTargets.Count - targetNo + _playerStatuses[player].Bots.Count - 1));
+				player.PrintToCenter(_translator!.Translate(player, "practice.progress", _playerStatuses[player].EnabledTargets.Count, _playerStatuses[player].EnabledTargets.Count - _playerStatuses[player].Progress; + _playerStatuses[player].Bots.Count - 1));
 			}
             	}
       	}
