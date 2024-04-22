@@ -99,15 +99,6 @@ public class OpenPrefirePrac : BasePlugin
         RegisterListener<Listeners.OnTick>(PlayerOnTick);
     }
 
-    private void SetPlayerClanTag(CCSPlayerController? player)
-    {
-        if (player == null || !player.IsValid || !player.IsBot || player.IsHLTV) return;
-
-        //player.Clan = "HIME-BOT";
-        //player.ClanName = "HIME-BOT";
-        player.PlayerName =  "HIME-BOT Donking";
-    }
-
     public void PlayerOnTick()
     {
         foreach (var player in Utilities.GetPlayers()
@@ -167,7 +158,6 @@ public class OpenPrefirePrac : BasePlugin
 
         if (player.IsBot)
         {
-            Server.NextFrame(() => SetPlayerClanTag(player));
             // For bots: If someone is practicing and it's an unmanaged bot, add or kick the bot
             if (_playerCount > 0 && !_ownerOfBots.ContainsKey(player))
             {
@@ -294,7 +284,6 @@ public class OpenPrefirePrac : BasePlugin
 
         if (playerOrBot.IsBot)
         {
-            Server.NextFrame(() => SetPlayerClanTag(playerOrBot));
             if (_ownerOfBots.ContainsKey(playerOrBot))
             {
                 // For managed bots
@@ -437,7 +426,6 @@ public class OpenPrefirePrac : BasePlugin
                     {
                         if (playerOrBot.IsValid && !playerOrBot.PawnIsAlive)
                         {
-                            SetPlayerClanTag(playerOrBot);
                             playerOrBot.Respawn();
                         }
                     });
@@ -796,7 +784,6 @@ public class OpenPrefirePrac : BasePlugin
             var bot = _playerStatuses[player].Bots[i];
             if (bot.IsValid)
             {
-                SetPlayerClanTag(bot);
                 // Server.ExecuteCommand($"bot_kill {bot.PlayerName}");
                 if(bot.PawnIsAlive)
                 {
@@ -920,7 +907,6 @@ public class OpenPrefirePrac : BasePlugin
             && bot.Pawn.Value != null
         )
         {
-            SetPlayerClanTag(bot);
             bot.Pawn.Value.MoveType = MoveType_t.MOVETYPE_OBSOLETE;
             Schema.SetSchemaValue(bot.Pawn.Value.Handle, "CBaseEntity", "m_nActualMoveType", 1);
             Utilities.SetStateChanged(bot.Pawn.Value, "CBaseEntity", "m_MoveType");
