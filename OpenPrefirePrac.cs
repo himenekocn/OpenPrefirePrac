@@ -815,7 +815,7 @@ public class OpenPrefirePrac : BasePlugin
         AddTimer(0.5f, () => ResetBots(player));
 
         DeleteGuidingLine(player);
-        DrawGuidingLine(player);
+        AddTimer(0.1f, () => DrawGuidingLine(player));
 
         // Setup player's HP
         if (_playerStatuses[player].HealingMethod == 1 || _playerStatuses[player].HealingMethod == 4)
