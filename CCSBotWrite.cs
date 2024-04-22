@@ -6,9 +6,9 @@ using CounterStrikeSharp.API.Core.Attributes;
 
 namespace OpenPrefirePrac;
 
-public partial class CCSBots : CBot
+public partial class CCSBotWrite : CBot
 {
-    public CCSBots (IntPtr pointer) : base(pointer) {}
+    public CCSBotWrite (IntPtr pointer) : base(pointer) {}
 
     [SchemaMember("CCSBot", "m_lookAtSpot")]
     public Vector SetlookAtSpot

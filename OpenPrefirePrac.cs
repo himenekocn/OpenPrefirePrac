@@ -130,8 +130,8 @@ public class OpenPrefirePrac : BasePlugin
         foreach (var bot in Utilities.GetPlayers()
                         .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
         {
-            CCSBots csbot = Schema.GetPointer<CCSBots>(bot.PlayerPawn.Value.Handle, "CCSPlayerPawnBase", "m_pBot");
-            csbot.SetlookAtSpot = new Vector(0, 0, 0);
+            CCSBotWrite csbot = Schema.GetPointer<CCSBotWrite>(bot.PlayerPawn.Value.Handle, "CCSPlayerPawnBase", "m_pBot");
+            csbot.SetlookAtSpot = new Vector(120, 120, 120);
         }
     }
 
@@ -905,7 +905,7 @@ public class OpenPrefirePrac : BasePlugin
         }
 
         player.PlayerPawn.Value!.Teleport(pos, ang, new Vector(0, 0, 0));
-        Schema.SetSchemaValue(player.PlayerPawn.Value.Handle, "CSSBot", "m_targetSpot", new Vector(0, 0, 0));
+        //Schema.SetSchemaValue(player.PlayerPawn.Value.Handle, "CCSBot", "m_targetSpot", new Vector(0, 0, 0));
     }
 
     private void FreezeBot(CCSPlayerController? bot)
