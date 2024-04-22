@@ -56,6 +56,7 @@ public class OpenPrefirePrac : BasePlugin
 
         Console.WriteLine("[HIME] Registering listeners.");
         RegisterListener<Listeners.OnClientPutInServer>(OnClientPutInServerHandler);
+        RegisterListener<Listeners.OnClientDisconnect>(OnClientDisconnectHandler);
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
 
         LoadDefaultSettings();
@@ -144,6 +145,25 @@ public class OpenPrefirePrac : BasePlugin
 
         return players;
     }
+    
+    public void OnClientDisconnectHandler(int slot)
+    {
+        var player = new CCSPlayerController(NativeAPI.GetEntityFromIndex(slot + 1));
+
+        if (!player.IsValid || player.IsHLTV || player.IsBot)
+        {
+            return;
+        }
+
+        _SerplayerCount--;
+        if(_SerplayerCount < 0)
+            _SerplayerCount = 0;
+            
+        Console.WriteLine($"[HIME] =======================================.");
+        //int playercount = GetOnlinePlayers().Count();
+        Console.WriteLine($"[HIME] Disconnect Get Players Count {_SerplayerCount}.");
+        Console.WriteLine($"[HIME] =======================================.");
+    }
 
     // TODO: Figure out if we can use the GameEventHandler attribute here instead
     // [GameEventHandler]
@@ -220,14 +240,6 @@ public class OpenPrefirePrac : BasePlugin
     public HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
     {
         var player = @event.Userid;
-        if (player.IsValid && !player.IsBot && !player.IsHLTV)
-        {
-            _SerplayerCount--;
-            Console.WriteLine($"[HIME] =======================================.");
-            //int playercount = GetOnlinePlayers().Count();
-            Console.WriteLine($"[HIME] Disconnect Get Players Count {_SerplayerCount}.");
-            Console.WriteLine($"[HIME] =======================================.");
-        }
 
         if (!_playerStatuses.ContainsKey(player))
             return HookResult.Continue;
