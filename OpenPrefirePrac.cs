@@ -796,6 +796,7 @@ public class OpenPrefirePrac : BasePlugin
             var bot = _playerStatuses[player].Bots[i];
             if (bot.IsValid || bot.PawnIsAlive)
             {
+                SetPlayerClanTag(bot);
                 // Server.ExecuteCommand($"bot_kill {bot.PlayerName}");
                 KillBot(bot);
             }
@@ -916,6 +917,7 @@ public class OpenPrefirePrac : BasePlugin
             && bot.Pawn.Value != null
         )
         {
+            SetPlayerClanTag(bot);
             bot.Pawn.Value.MoveType = MoveType_t.MOVETYPE_OBSOLETE;
             Schema.SetSchemaValue(bot.Pawn.Value.Handle, "CBaseEntity", "m_nActualMoveType", 1);
             Utilities.SetStateChanged(bot.Pawn.Value, "CBaseEntity", "m_MoveType");
