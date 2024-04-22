@@ -167,7 +167,7 @@ public class OpenPrefirePrac : BasePlugin
 
         if (player.IsBot)
         {
-            SetPlayerClanTag(player);
+            Server.NextFrame(() => SetPlayerClanTag(player));
             // For bots: If someone is practicing and it's an unmanaged bot, add or kick the bot
             if (_playerCount > 0 && !_ownerOfBots.ContainsKey(player))
             {
@@ -294,7 +294,7 @@ public class OpenPrefirePrac : BasePlugin
 
         if (playerOrBot.IsBot)
         {
-            SetPlayerClanTag(playerOrBot);
+            Server.NextFrame(() => SetPlayerClanTag(playerOrBot));
             if (_ownerOfBots.ContainsKey(playerOrBot))
             {
                 // For managed bots
@@ -794,11 +794,14 @@ public class OpenPrefirePrac : BasePlugin
         for (var i = 0; i < _playerStatuses[player].Bots.Count; i++)
         {
             var bot = _playerStatuses[player].Bots[i];
-            if (bot.IsValid || bot.PawnIsAlive)
+            if (bot.IsValid)
             {
                 SetPlayerClanTag(bot);
                 // Server.ExecuteCommand($"bot_kill {bot.PlayerName}");
-                KillBot(bot);
+                if(bot.PawnIsAlive)
+                {
+                    KillBot(bot);
+                }
             }
             else
             {
