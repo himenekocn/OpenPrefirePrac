@@ -115,7 +115,7 @@ public class OpenPrefirePrac : BasePlugin
             if (_playerStatuses[player].PracticeIndex == -1)
             {
                 SetMoveType(player, MoveType_t.MOVETYPE_NONE);
-                player.PrintToCenter("输入 !prefire 开始你的训练 \n由于未开始，当前无法移动");
+                player.PrintToCenter("输入 !menu 开始你的训练 \n由于未开始，当前无法移动");
             }
             else
             {
@@ -466,6 +466,7 @@ public class OpenPrefirePrac : BasePlugin
     public void OnPrefireCommand(CCSPlayerController player, CommandInfo commandInfo)
     {
         var mainMenu = new ChatMenu(_translator!.Translate(player, "mainmenu.title"));
+        mainMenu.PostSelectAction = PostSelectAction.Close;
 
         mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.practice"), OpenPracticeMenu);
         mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.map"), OpenMapMenu);
@@ -571,6 +572,7 @@ public class OpenPrefirePrac : BasePlugin
     public void OpenMapMenu(CCSPlayerController player, ChatMenuOption option)
     {
         var mapMenu = new ChatMenu(_translator!.Translate(player, "mapmenu.title"));
+        mapMenu.PostSelectAction = PostSelectAction.Close;
         foreach (var map in _availableMaps)
         {
             mapMenu.AddMenuOption(map, ChangeMap);
@@ -598,8 +600,9 @@ public class OpenPrefirePrac : BasePlugin
     {
         // Dynamically draw menu
         var practiceMenu = new ChatMenu(_translator!.Translate(player, "practicemenu.title"));
+        practiceMenu.PostSelectAction = PostSelectAction.Close;
         _playerStatuses[player].LocalizedPracticeNames.Clear();
-
+        var enablepranum = 0;
         for (var i = 0; i < _practices.Count; i++)
         {
             if (_practiceEnabled[i])
@@ -607,6 +610,7 @@ public class OpenPrefirePrac : BasePlugin
                 var tmpLocalizedPracticeName = _translator.Translate(player, $"map.{_mapName}.{_practices[i].PracticeName}");
                 _playerStatuses[player].LocalizedPracticeNames.Add(tmpLocalizedPracticeName, i);
                 practiceMenu.AddMenuOption(tmpLocalizedPracticeName, OnRouteSelect); // practice name here is split by space instead of underline. TODO: Use localized text.
+                enablepranum++;
             }
         }
         int practiceNo = _playerStatuses[player].PracticeIndex;
@@ -620,6 +624,10 @@ public class OpenPrefirePrac : BasePlugin
 
         player.PrintToChat("================== [HIME] =================");
         MenuManager.OpenChatMenu(player, practiceMenu);
+        if (enablepranum <= 0)
+        {
+            player.PrintToChat("暂无可用训练线路，请等待他人结束!");
+        }
         player.PrintToChat("===========================================");
     }
 
@@ -627,6 +635,7 @@ public class OpenPrefirePrac : BasePlugin
     {
         // Dynamically draw menu
         var difficultyMenu = new ChatMenu(_translator!.Translate(player, "difficulty.title"));
+        difficultyMenu.PostSelectAction = PostSelectAction.Close;
         _playerStatuses[player].LocalizedDifficultyNames.Clear();
 
         for (var i = 0; i < 5; i++)
@@ -652,6 +661,7 @@ public class OpenPrefirePrac : BasePlugin
     public void OpenModeMenu(CCSPlayerController player, ChatMenuOption option)
     {
         var trainingModeMenu = new ChatMenu(_translator!.Translate(player, "modemenu.title"));
+        trainingModeMenu.PostSelectAction = PostSelectAction.Close;
         _playerStatuses[player].LocalizedTrainingModeNames.Clear();
 
         for (var i = 0; i < 2; i++)
@@ -678,7 +688,7 @@ public class OpenPrefirePrac : BasePlugin
     {
         // No need for localization here.
         var languageMenu = new ChatMenu("Change language settings");
-
+        languageMenu.PostSelectAction = PostSelectAction.Close;
         languageMenu.AddMenuOption("English", OnLanguageChosen);
         languageMenu.AddMenuOption("Português", OnLanguageChosen);
         languageMenu.AddMenuOption("中文", OnLanguageChosen);
@@ -836,7 +846,7 @@ public class OpenPrefirePrac : BasePlugin
 
         // Test a new method of adding bots
         _botRequests.Add(player, numberOfBots);
-
+        /*
         for (var i = 0; i < numberOfBots; i++)
         {
             if (player.TeamNum == (byte)CsTeam.CounterTerrorist)
@@ -850,7 +860,7 @@ public class OpenPrefirePrac : BasePlugin
                 Server.ExecuteCommand("bot_add_ct");
             }
         }
-
+        */
         // AddTimer(0.2f, () =>
         // {
         //     var numberBotToFind = numberOfBots;
