@@ -905,9 +905,7 @@ public class OpenPrefirePrac : BasePlugin
         }
 
         player.PlayerPawn.Value!.Teleport(pos, ang, new Vector(0, 0, 0));
-        CCSBotWrite csbot = Schema.GetPointer<CCSBotWrite>(player.PlayerPawn.Value.Handle, "CCSPlayerPawnBase", "m_pBot");
-        csbot.SetlookAtSpot = new Vector(120, 120, 120);
-        //Schema.SetSchemaValue(player.PlayerPawn.Value.Handle, "CCSBot", "m_targetSpot", new Vector(0, 0, 0));
+        Schema.SetSchemaValue<Vector>(player.PlayerPawn.Value.Bot!.Handle, "CCSBot", "m_targetSpot", new Vector(120, 120, 120));
     }
 
     private void FreezeBot(CCSPlayerController? bot)
