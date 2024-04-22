@@ -296,7 +296,6 @@ public class OpenPrefirePrac : BasePlugin
 
             if (_ownerOfBots.ContainsKey(playerOrBot))
             {
-                SetPlayerClanTag(playerOrBot);
                 // For managed bots
                 var owner = _ownerOfBots[playerOrBot];
                 var targetNo = _playerStatuses[owner].Progress;
@@ -798,6 +797,7 @@ public class OpenPrefirePrac : BasePlugin
             {
                 // Server.ExecuteCommand($"bot_kill {bot.PlayerName}");
                 KillBot(bot);
+                SetPlayerClanTag(bot);
             }
             else
             {
