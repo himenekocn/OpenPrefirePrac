@@ -103,8 +103,9 @@ public class OpenPrefirePrac : BasePlugin
     {
         if (player == null || !player.IsValid || !player.IsBot || player.IsHLTV) return;
 
-        player.Clan = "HIME-BOT";
-        player.ClanName = "HIME-BOT";
+        //player.Clan = "HIME-BOT";
+        //player.ClanName = "HIME-BOT";
+        player.PlayerName =  "HIME-BOT {player.PlayerName}";
     }
 
     public void PlayerOnTick()
@@ -127,12 +128,12 @@ public class OpenPrefirePrac : BasePlugin
             }
         }
 
-        foreach (var bot in Utilities.GetPlayers()
-                        .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
-        {
-            //Console.WriteLine($"[HIME] GetBot {bot.PlayerName}");
-            Schema.SetSchemaValue(bot.PlayerPawn.Value!.Handle, "CCSBot", "m_targetSpot", new Vector(120, 120, 120));
-        }
+        //foreach (var bot in Utilities.GetPlayers()
+        //                .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
+        //{
+        //Console.WriteLine($"[HIME] GetBot {bot.PlayerName}");
+        //Schema.SetSchemaValue(bot.PlayerPawn.Value!.Handle, "CCSBot", "m_targetSpot", new Vector(120, 120, 120));
+        //}
     }
 
     public static List<CCSPlayerController> GetOnlinePlayers()
@@ -847,21 +848,21 @@ public class OpenPrefirePrac : BasePlugin
 
         // Test a new method of adding bots
         _botRequests.Add(player, numberOfBots);
-        /*
+
         for (var i = 0; i < numberOfBots; i++)
         {
-            if (player.TeamNum == (byte)CsTeam.CounterTerrorist)
-            {
-                Server.ExecuteCommand("bot_join_team T");
-                Server.ExecuteCommand("bot_add_t");
-            }
-            else if (player.TeamNum == (byte)CsTeam.Terrorist)
-            {
-                Server.ExecuteCommand("bot_join_team CT");
-                Server.ExecuteCommand("bot_add_ct");
-            }
+            //if (player.TeamNum == (byte)CsTeam.CounterTerrorist)
+            //{
+            //    Server.ExecuteCommand("bot_join_team T");
+            //   Server.ExecuteCommand("bot_add_t");
+            //}
+            //else if (player.TeamNum == (byte)CsTeam.Terrorist)
+            //{
+            Server.ExecuteCommand("bot_join_team CT");
+            Server.ExecuteCommand("bot_add_ct");
+            //}
         }
-        */
+
         // AddTimer(0.2f, () =>
         // {
         //     var numberBotToFind = numberOfBots;
