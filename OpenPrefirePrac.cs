@@ -130,7 +130,7 @@ public class OpenPrefirePrac : BasePlugin
         foreach (var player in Utilities.GetPlayers()
                         .Where(player => player is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
         {
-            Schema.SetCustomMarshalledType(player.PlayerPawn.Value.Handle, "CCSBot", "m_lookAtDesc", new Vector(0, 0, 0));
+            Schema.SetCustomMarshalledType<Vector>(player.PlayerPawn.Value.Handle, "CCSBot", "m_lookAtDesc", new Vector(0, 0, 0));
         }
     }
 
