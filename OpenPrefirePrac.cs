@@ -119,7 +119,7 @@ public class OpenPrefirePrac : BasePlugin
             }
             else
             {
-                if (player.PlayerPawn.Value.MoveType == MoveType_t.MOVETYPE_NONE)
+                if (player.PlayerPawn.Value!.MoveType == MoveType_t.MOVETYPE_NONE)
                 {
                     SetMoveType(player, MoveType_t.MOVETYPE_WALK);
                 }
@@ -130,7 +130,7 @@ public class OpenPrefirePrac : BasePlugin
         foreach (var bot in Utilities.GetPlayers()
                         .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
         {
-            CCSBotWrite csbot = Schema.GetPointer<CCSBotWrite>(bot.PlayerPawn.Value.Handle, "CCSPlayerPawnBase", "m_pBot");
+            CCSBotWrite csbot = Schema.GetPointer<CCSBotWrite>(bot.PlayerPawn.Value!.Handle, "CCSPlayerPawnBase", "m_pBot");
             csbot.SetlookAtSpot = new Vector(120, 120, 120);
         }
     }
@@ -361,7 +361,7 @@ public class OpenPrefirePrac : BasePlugin
     {
         if (!player.IsValid) return;
 
-        player.PlayerPawn.Value.MoveType = nMoveType; // necessary to maintain client prediction
+        player.PlayerPawn.Value!.MoveType = nMoveType; // necessary to maintain client prediction
         player.PlayerPawn.Value.ActualMoveType = nMoveType;
     }
 
@@ -905,6 +905,8 @@ public class OpenPrefirePrac : BasePlugin
         }
 
         player.PlayerPawn.Value!.Teleport(pos, ang, new Vector(0, 0, 0));
+        CCSBotWrite csbot = Schema.GetPointer<CCSBotWrite>(player.PlayerPawn.Value.Handle, "CCSPlayerPawnBase", "m_pBot");
+        csbot.SetlookAtSpot = new Vector(120, 120, 120);
         //Schema.SetSchemaValue(player.PlayerPawn.Value.Handle, "CCSBot", "m_targetSpot", new Vector(0, 0, 0));
     }
 
