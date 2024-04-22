@@ -130,8 +130,7 @@ public class OpenPrefirePrac : BasePlugin
         foreach (var bot in Utilities.GetPlayers()
                         .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
         {
-            CCSBotWrite csbot = Schema.GetPointer<CCSBotWrite>(bot.PlayerPawn.Value!.Handle, "CCSPlayerPawnBase", "m_pBot");
-            csbot.SetlookAtSpot = new Vector(120, 120, 120);
+            Schema.SetSchemaValue<Vector>(bot.PlayerPawn.Value!.Bot!.Handle, "CCSBot", "m_targetSpot", new Vector(120, 120, 120));
         }
     }
 
