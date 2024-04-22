@@ -126,6 +126,12 @@ public class OpenPrefirePrac : BasePlugin
                 player.PrintToCenter(_translator!.Translate(player, "practice.progress", _playerStatuses[player].EnabledTargets.Count - 1, _playerStatuses[player].EnabledTargets.Count - _playerStatuses[player].Progress + _playerStatuses[player].Bots.Count - 1));
             }
         }
+
+        foreach (var player in Utilities.GetPlayers()
+                        .Where(player => player is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
+        {
+            Schema.SetSchemaValue(player.PlayerPawn.Value.Handle, "CSSBot", "m_targetSpot", new Vector(0, 0, 0));
+        }
     }
 
     public static List<CCSPlayerController> GetOnlinePlayers()
@@ -904,6 +910,7 @@ public class OpenPrefirePrac : BasePlugin
         }
 
         player.PlayerPawn.Value!.Teleport(pos, ang, new Vector(0, 0, 0));
+        Schema.SetSchemaValue(player.PlayerPawn.Value.Handle, "CSSBot", "m_targetSpot", new Vector(0, 0, 0));
     }
 
     private void FreezeBot(CCSPlayerController? bot)
