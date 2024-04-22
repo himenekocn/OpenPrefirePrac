@@ -130,9 +130,8 @@ public class OpenPrefirePrac : BasePlugin
         foreach (var bot in Utilities.GetPlayers()
                         .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
         {
-            CCSBot bothandle = bot.PlayerPawn.Value.Bot;
-            Schema.SetString(bothandle.Handle, "CCSBot", "m_lookAtSpot", "0.0 0.0 0.0");
-            //chema.SetCustomMarshalledType<Vector>(bothandle.Handle, "CCSBot", "m_lookAtSpot", new Vector(0, 0, 0));
+            CCSBots csbot = Schema.GetPointer<CCSBots>(bot.PlayerPawn.Value.Handle, "CCSPlayerPawnBase", "m_pBot");
+            csbot.SetlookAtSpot = new Vector(0, 0, 0);
         }
     }
 
