@@ -474,7 +474,6 @@ public class OpenPrefirePrac : BasePlugin
     public void OnPrefireCommand(CCSPlayerController player, CommandInfo commandInfo)
     {
         var mainMenu = new ChatMenu(_translator!.Translate(player, "mainmenu.title"));
-        mainMenu.PostSelectAction = PostSelectAction.Close;
 
         mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.practice"), OpenPracticeMenu);
         mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.map"), OpenMapMenu);
@@ -580,7 +579,6 @@ public class OpenPrefirePrac : BasePlugin
     public void OpenMapMenu(CCSPlayerController player, ChatMenuOption option)
     {
         var mapMenu = new ChatMenu(_translator!.Translate(player, "mapmenu.title"));
-        mapMenu.PostSelectAction = PostSelectAction.Close;
         foreach (var map in _availableMaps)
         {
             mapMenu.AddMenuOption(map, ChangeMap);
@@ -608,7 +606,6 @@ public class OpenPrefirePrac : BasePlugin
     {
         // Dynamically draw menu
         var practiceMenu = new ChatMenu(_translator!.Translate(player, "practicemenu.title"));
-        practiceMenu.PostSelectAction = PostSelectAction.Close;
         _playerStatuses[player].LocalizedPracticeNames.Clear();
         var enablepranum = 0;
         for (var i = 0; i < _practices.Count; i++)
@@ -643,7 +640,6 @@ public class OpenPrefirePrac : BasePlugin
     {
         // Dynamically draw menu
         var difficultyMenu = new ChatMenu(_translator!.Translate(player, "difficulty.title"));
-        difficultyMenu.PostSelectAction = PostSelectAction.Close;
         _playerStatuses[player].LocalizedDifficultyNames.Clear();
 
         for (var i = 0; i < 5; i++)
@@ -669,7 +665,6 @@ public class OpenPrefirePrac : BasePlugin
     public void OpenModeMenu(CCSPlayerController player, ChatMenuOption option)
     {
         var trainingModeMenu = new ChatMenu(_translator!.Translate(player, "modemenu.title"));
-        trainingModeMenu.PostSelectAction = PostSelectAction.Close;
         _playerStatuses[player].LocalizedTrainingModeNames.Clear();
 
         for (var i = 0; i < 2; i++)
@@ -696,7 +691,6 @@ public class OpenPrefirePrac : BasePlugin
     {
         // No need for localization here.
         var languageMenu = new ChatMenu("Change language settings");
-        languageMenu.PostSelectAction = PostSelectAction.Close;
         languageMenu.AddMenuOption("English", OnLanguageChosen);
         languageMenu.AddMenuOption("Português", OnLanguageChosen);
         languageMenu.AddMenuOption("中文", OnLanguageChosen);
