@@ -105,7 +105,7 @@ public class OpenPrefirePrac : BasePlugin
 
         //player.Clan = "HIME-BOT";
         //player.ClanName = "HIME-BOT";
-        player.PlayerName =  "HIME-BOT {player.PlayerName}";
+        player.PlayerName =  "HIME-BOT" + player.PlayerName;
     }
 
     public void PlayerOnTick()
@@ -128,12 +128,13 @@ public class OpenPrefirePrac : BasePlugin
             }
         }
 
-        //foreach (var bot in Utilities.GetPlayers()
-        //                .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
-        //{
+        foreach (var bot in Utilities.GetPlayers()
+                        .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
+        {
+            RefillAmmo(bot);
         //Console.WriteLine($"[HIME] GetBot {bot.PlayerName}");
         //Schema.SetSchemaValue(bot.PlayerPawn.Value!.Handle, "CCSBot", "m_targetSpot", new Vector(120, 120, 120));
-        //}
+        }
     }
 
     public static List<CCSPlayerController> GetOnlinePlayers()
@@ -186,7 +187,6 @@ public class OpenPrefirePrac : BasePlugin
                     _playerStatuses[tmpPlayerNumBots.Key].Bots.Add(player);
                     _ownerOfBots.Add(player, tmpPlayerNumBots.Key);
                     Console.WriteLine($"[HIME] Bot {player.PlayerName}, slot: {player.Slot} has been spawned.");
-                    AddTimer(1.0f, () => SetPlayerClanTag(player));
                 }
                 else
                 {
@@ -296,6 +296,7 @@ public class OpenPrefirePrac : BasePlugin
 
             if (_ownerOfBots.ContainsKey(playerOrBot))
             {
+                SetPlayerClanTag(playerOrBot);
                 // For managed bots
                 var owner = _ownerOfBots[playerOrBot];
                 var targetNo = _playerStatuses[owner].Progress;
@@ -314,7 +315,6 @@ public class OpenPrefirePrac : BasePlugin
                             .Rotation);
 
                     Server.NextFrame(() => FreezeBot(playerOrBot));
-                    AddTimer(1.0f, () => SetPlayerClanTag(playerOrBot));
                 }
                 else
                 {
