@@ -130,7 +130,8 @@ public class OpenPrefirePrac : BasePlugin
         foreach (var bot in Utilities.GetPlayers()
                         .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
         {
-            Schema.SetSchemaValue<Vector>(bot.PlayerPawn.Value!.Bot!.Handle, "CCSBot", "m_targetSpot", new Vector(120, 120, 120));
+            Console.WriteLine($"[HIME] GetBot {bot.PlayerName}");
+            Schema.SetSchemaValue(bot.PlayerPawn.Value!.Handle, "CCSBot", "m_targetSpot", new Vector(120, 120, 120));
         }
     }
 
@@ -904,7 +905,7 @@ public class OpenPrefirePrac : BasePlugin
         }
 
         player.PlayerPawn.Value!.Teleport(pos, ang, new Vector(0, 0, 0));
-        Schema.SetSchemaValue(player.PlayerPawn.Value.Handle, "CCSBot", "m_targetSpot", new Vector(120, 120, 120));
+        //Schema.SetSchemaValue(player.PlayerPawn.Value.Handle, "CCSBot", "m_targetSpot", new Vector(120, 120, 120));
     }
 
     private void FreezeBot(CCSPlayerController? bot)
