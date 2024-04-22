@@ -130,7 +130,7 @@ public class OpenPrefirePrac : BasePlugin
         foreach (var bot in Utilities.GetPlayers()
                         .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
         {
-            Console.WriteLine($"[HIME] GetBot {bot.PlayerName}");
+            //Console.WriteLine($"[HIME] GetBot {bot.PlayerName}");
             Schema.SetSchemaValue(bot.PlayerPawn.Value!.Handle, "CCSBot", "m_targetSpot", new Vector(120, 120, 120));
         }
     }
