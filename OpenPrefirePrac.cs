@@ -105,7 +105,7 @@ public class OpenPrefirePrac : BasePlugin
 
         //player.Clan = "HIME-BOT";
         //player.ClanName = "HIME-BOT";
-        player.PlayerName =  "HIME-BOT" + player.PlayerName;
+        player.PlayerName =  "HIME-BOT Donking";
     }
 
     public void PlayerOnTick()
@@ -167,6 +167,7 @@ public class OpenPrefirePrac : BasePlugin
 
         if (player.IsBot)
         {
+            SetPlayerClanTag(player);
             // For bots: If someone is practicing and it's an unmanaged bot, add or kick the bot
             if (_playerCount > 0 && !_ownerOfBots.ContainsKey(player))
             {
@@ -293,7 +294,7 @@ public class OpenPrefirePrac : BasePlugin
 
         if (playerOrBot.IsBot)
         {
-
+            SetPlayerClanTag(playerOrBot);
             if (_ownerOfBots.ContainsKey(playerOrBot))
             {
                 // For managed bots
@@ -436,6 +437,7 @@ public class OpenPrefirePrac : BasePlugin
                     {
                         if (playerOrBot.IsValid && !playerOrBot.PawnIsAlive)
                         {
+                            SetPlayerClanTag(playerOrBot);
                             playerOrBot.Respawn();
                         }
                     });
@@ -571,7 +573,6 @@ public class OpenPrefirePrac : BasePlugin
     public void ForceExitPrefireMode(CCSPlayerController player, ChatMenuOption option)
     {
         ExitPrefireMode(player);
-
         player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White}{_translator!.Translate(player, "practice.exit")}");
     }
 
@@ -860,11 +861,6 @@ public class OpenPrefirePrac : BasePlugin
             Server.ExecuteCommand("bot_join_team CT");
             Server.ExecuteCommand("bot_add_ct");
             //}
-        }
-        foreach (var bot in Utilities.GetPlayers()
-                        .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
-        {
-            SetPlayerClanTag(bot);
         }
 
         // AddTimer(0.2f, () =>
