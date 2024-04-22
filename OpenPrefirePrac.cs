@@ -797,7 +797,6 @@ public class OpenPrefirePrac : BasePlugin
             {
                 // Server.ExecuteCommand($"bot_kill {bot.PlayerName}");
                 KillBot(bot);
-                SetPlayerClanTag(bot);
             }
             else
             {
@@ -861,6 +860,11 @@ public class OpenPrefirePrac : BasePlugin
             Server.ExecuteCommand("bot_join_team CT");
             Server.ExecuteCommand("bot_add_ct");
             //}
+        }
+        foreach (var bot in Utilities.GetPlayers()
+                        .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
+        {
+            SetPlayerClanTag(bot);
         }
 
         // AddTimer(0.2f, () =>
