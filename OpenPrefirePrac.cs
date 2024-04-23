@@ -76,6 +76,7 @@ public class OpenPrefirePrac : BasePlugin
             _playerCount = 0;
             _SerplayerCount = 0;
             _playerStatuses.Clear();
+            _botRequests.Clear();
 
             // Clear saved convars
             _serverStatus.WarmupStatus = true;
@@ -121,6 +122,7 @@ public class OpenPrefirePrac : BasePlugin
             _playerCount = 0;
             _SerplayerCount = 0;
             _playerStatuses.Clear();
+            _botRequests.Clear();
 
             // Clear saved convars
             _serverStatus.WarmupStatus = true;
@@ -187,8 +189,16 @@ public class OpenPrefirePrac : BasePlugin
         }
 
         _SerplayerCount--;
-        if(_SerplayerCount < 0)
+        if(_SerplayerCount <= 0)
+        {
             _SerplayerCount = 0;
+            AddTimer(20.0f, () => {
+                if (_SerplayerCount <= 0)
+                {
+                    Server.ExecuteCommand("quit");
+                }
+            });
+        }
             
         Console.WriteLine($"[HIME] =======================================.");
         //int playercount = GetOnlinePlayers().Count();
@@ -276,10 +286,16 @@ public class OpenPrefirePrac : BasePlugin
             return HookResult.Continue;
 
         if (_playerStatuses[player].PracticeIndex != -1)
+        {
             ExitPrefireMode(player);
+        }
 
         // Release resources(practices, targets, bots...)
         _playerStatuses.Remove(player);
+        if (_botRequests.ContainsKey(player))
+        {
+            _botRequests.Remove(player);
+        }
 
         return HookResult.Continue;
     }
@@ -1269,8 +1285,8 @@ public class OpenPrefirePrac : BasePlugin
         Server.ExecuteCommand("mp_free_armor 2");
         Server.ExecuteCommand("mp_limitteams 0");
         // Server.ExecuteCommand("sv_infinite_ammo 1");
-        Server.ExecuteCommand("mp_maxmoney 60000");
-        Server.ExecuteCommand("mp_startmoney 60000");
+        Server.ExecuteCommand("mp_maxmoney 114514");
+        Server.ExecuteCommand("mp_startmoney 114514");
         Server.ExecuteCommand("bot_difficulty 5");
         Server.ExecuteCommand("custom_bot_difficulty 5");
         Server.ExecuteCommand("mp_death_drop_gun 0");
@@ -1558,11 +1574,11 @@ public class OpenPrefirePrac : BasePlugin
                         }
                         player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White} {_translator!.Translate(player, "practice.help", _practices.Count)}");
                         return;
-                    case "mp":
+                    case "map":
                         string mapName = commandInfo.ArgByIndex(2);
                         ChangeMap(player, mapName);
                         return;
-                    case "hd":
+                    case "df":
                         int difficulty = 0;
                         if (int.TryParse(commandInfo.ArgByIndex(2), out difficulty) && difficulty > 0 && difficulty <= 5)
                         {
@@ -1627,6 +1643,7 @@ public class OpenPrefirePrac : BasePlugin
             mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.exit"), OnForceExitPrefireMode);
             player.PrintToChat("================== [HIME] =================");
             MenuManager.OpenChatMenu(player, mainMenu);
+            player.PrintToChat(_translator.Translate(player, "mainmenu.shortcut_prompt"));
             player.PrintToChat("===========================================");
         });
 
