@@ -139,7 +139,7 @@ public class OpenPrefirePrac : BasePlugin
             if (_playerStatuses[player].PracticeIndex == -1)
             {
                 SetMoveType(player, MoveType_t.MOVETYPE_NONE);
-                player.PrintToCenter("输入 !menu 开始你的训练 \n由于未开始，当前无法移动");
+                player.PrintToCenter("输入 !prefire 开始你的训练 \n由于未开始，当前无法移动");
             }
             else
             {
