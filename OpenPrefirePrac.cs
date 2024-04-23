@@ -192,10 +192,10 @@ public class OpenPrefirePrac : BasePlugin
         if(_SerplayerCount <= 0)
         {
             _SerplayerCount = 0;
-            AddTimer(20.0f, () => {
+            AddTimer(15.0f, () => {
                 if (_SerplayerCount <= 0)
                 {
-                    Server.ExecuteCommand("quit");
+                    Server.ExecuteCommand("changelevel de_mirage");
                 }
             });
         }
