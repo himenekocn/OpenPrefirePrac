@@ -174,7 +174,7 @@ public class OpenPrefirePrac : BasePlugin
             if (ex.Message != "Invalid game event") 
             {
                 Console.WriteLine("[HIME] TimerOnTick :{ex.Message}");
-                Logger.LogInformation("[HIME] TimerOnTick :{ex.Message}")
+                Logger.LogInformation("[HIME] TimerOnTick :{ex.Message}");
             }
         }
     }
@@ -1543,7 +1543,7 @@ public class OpenPrefirePrac : BasePlugin
            if (ex.Message != "Invalid game event")
            {
                Console.WriteLine("[HIME] Error in StartPrac:{ex.Message}");
-               Logger.LogInformation("[HIME] Error in StartPrac :{ex.Message}")
+               Logger.LogInformation("[HIME] Error in StartPrac :{ex.Message}");
            }
         }
     }
