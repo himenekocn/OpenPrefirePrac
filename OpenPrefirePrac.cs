@@ -856,7 +856,7 @@ public class OpenPrefirePrac : BasePlugin
         var practiceNo = _playerStatuses[player].PracticeIndex;
 
         GenerateRandomPractice(player);
-        AddTimer(0.5f, () => ResetBots(player));
+        ResetBots(player);
 
         DeleteGuidingLine(player);
         AddTimer(0.1f, () => DrawGuidingLine(player));
@@ -954,7 +954,7 @@ public class OpenPrefirePrac : BasePlugin
         {
             var movementService = new CCSPlayer_MovementServices(player.PlayerPawn.Value!.MovementServices!.Handle);
             AddTimer(0.1f, () => movementService.DuckAmount = 1);
-            AddTimer(0.2f, () => player.PlayerPawn.Value.Bot!.IsCrouching = true);
+            AddTimer(0.2f, () => player.PlayerPawn.Value!.Bot!.IsCrouching = true);
         }
 
         player.PlayerPawn.Value!.Teleport(pos, ang, new Vector(0, 0, 0));
