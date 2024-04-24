@@ -140,8 +140,7 @@ public class OpenPrefirePrac : BasePlugin
 
     public void PlayerOnTick()
     {
-        foreach (var player in Utilities.GetPlayers()
-                        .Where(player => player is { IsValid: true, IsBot: false, PawnIsAlive: true, IsHLTV: false }))
+        foreach (var player in Utilities.GetPlayers().Where(player => player is { IsValid: true, IsBot: false, PawnIsAlive: true, IsHLTV: false }))
         {
             if (_playerStatuses[player].PracticeIndex == -1)
             {
