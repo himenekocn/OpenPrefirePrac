@@ -141,29 +141,36 @@ public class OpenPrefirePrac : BasePlugin
     }
 
     public void PlayerOnTick()
-    {
-        foreach (var player in Utilities.GetPlayers().Where(player => player is { IsValid: true, IsBot: false, PawnIsAlive: true, IsHLTV: false }))
+    {    
+        try
         {
-            if (_playerStatuses[player].PracticeIndex == -1)
+            foreach (var player in Utilities.GetPlayers().Where(player => player is { IsValid: true, IsBot: false, PawnIsAlive: true, IsHLTV: false }))
             {
-                SetMoveType(player, MoveType_t.MOVETYPE_NONE);
-                player.PrintToCenter("输入 !prefire 开始你的训练 \n由于未开始，当前无法移动");
-            }
-            else
-            {
-                if (player.PlayerPawn.Value!.MoveType == MoveType_t.MOVETYPE_NONE)
+                if (_playerStatuses[player].PracticeIndex == -1)
                 {
-                    SetMoveType(player, MoveType_t.MOVETYPE_WALK);
+                    SetMoveType(player, MoveType_t.MOVETYPE_NONE);
+                    player.PrintToCenter("输入 !prefire 开始你的训练 \n由于未开始，当前无法移动");
                 }
+                else
+                {
+                    if (player.PlayerPawn.Value!.MoveType == MoveType_t.MOVETYPE_NONE)
+                    {
+                        SetMoveType(player, MoveType_t.MOVETYPE_WALK);
+                    }
                 player.PrintToCenter(_translator!.Translate(player, "practice.progress", _playerStatuses[player].EnabledTargets.Count - 1, _playerStatuses[player].EnabledTargets.Count - _playerStatuses[player].Progress + _playerStatuses[player].Bots.Count - 1));
+                }
+            }
+
+            foreach (var bot in Utilities.GetPlayers().Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
+            {
+                RefillAmmo(bot);
+                //Console.WriteLine($"[HIME] GetBot {bot.PlayerName}");
+                //Schema.SetSchemaValue(bot.PlayerPawn.Value!.Handle, "CCSBot", "m_targetSpot", new Vector(120, 120, 120));
             }
         }
-
-        foreach (var bot in Utilities.GetPlayers().Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
+        catch (Exception ex)
         {
-            RefillAmmo(bot);
-            //Console.WriteLine($"[HIME] GetBot {bot.PlayerName}");
-            //Schema.SetSchemaValue(bot.PlayerPawn.Value!.Handle, "CCSBot", "m_targetSpot", new Vector(120, 120, 120));
+            if (ex.Message != "Invalid game event") Console.WriteLine("[HIME] TimerOnTick :{ex.Message}"");
         }
     }
 
@@ -1448,6 +1455,8 @@ public class OpenPrefirePrac : BasePlugin
 
     private void StartPractice(CCSPlayerController player, int practiceIndex)
     {
+    try
+    {
         if (_playerCount == 0)
         {
             SaveConvars();
@@ -1523,6 +1532,11 @@ public class OpenPrefirePrac : BasePlugin
         var localizedPracticeName = _translator!.Translate(player, "map." + _mapName + "." + _practices[practiceIndex].PracticeName);
         player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White} {_translator.Translate(player, "practice.choose", localizedPracticeName)}");
         player.PrintToCenter(_translator.Translate(player, "practice.begin"));
+        }
+        catch (Exception ex)
+        {
+           if (ex.Message != "Invalid game event") Console.WriteLine("[HIME] Error in StartPrac:{ex.Message}");
+        }
     }
 
     private void ChangeMap(CCSPlayerController player, string mapName)
@@ -1578,7 +1592,7 @@ public class OpenPrefirePrac : BasePlugin
         ChatMenus.OpenMenu(player, gunMenu);
         player.PrintToChat("===========================================");
     }
-
+    [ConsoleCommand("dq")]
     [ConsoleCommand("gun")]
     [ConsoleCommand("guns")]
     [ConsoleCommand("rifles")]
@@ -1602,11 +1616,12 @@ public class OpenPrefirePrac : BasePlugin
     {
         player.PrintToChat("================== [HIME] =================");
         var gunMenu = new ChatMenu($"---副武器菜单");
-        MenuHelper.GetGuns(gunMenu, WeaponType.Primary);
+        MenuHelper.GetGuns(gunMenu, WeaponType.Secondary);
         ChatMenus.OpenMenu(player, gunMenu);
         player.PrintToChat("===========================================");
     }
-
+    [ConsoleCommand("sq")]
+    [ConsoleCommand("pistol")]
     [ConsoleCommand("pistols")]
     [ConsoleCommand("secondary")]
     public void Pistols(CCSPlayerController? player, CommandInfo info)
