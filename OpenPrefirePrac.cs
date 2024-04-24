@@ -864,6 +864,8 @@ public class OpenPrefirePrac : BasePlugin
         // Setup player's HP
         if (_playerStatuses[player].HealingMethod == 1 || _playerStatuses[player].HealingMethod == 4)
             AddTimer(0.5f, () => SetPlayerHealth(player, 500));
+        else
+            AddTimer(0.5f, () => SetPlayerHealth(player, 100));
         AddTimer(1f, () => EquipPlayer(player));
         AddTimer(1.5f, () => MovePlayer(player, false, _practices[practiceNo].Player.Position, _practices[practiceNo].Player.Rotation));
         SetMoveType(player, MoveType_t.MOVETYPE_WALK);
@@ -982,7 +984,14 @@ public class OpenPrefirePrac : BasePlugin
         player.RemoveWeapons();
 
         // Give weapons and items
-        player.GiveNamedItem("weapon_ak47");
+        if(_playerStatuses[player].PlayerWeapon.GiveName != null)
+        {
+            player.GiveNamedItem(_playerStatuses[player].PlayerWeapon.GiveName);
+        }
+        else
+        {
+            player.GiveNamedItem("weapon_ak47");
+        }
         player.GiveNamedItem("weapon_deagle");
         player.GiveNamedItem("weapon_knife");
         player.GiveNamedItem("weapon_flashbang");
@@ -1536,6 +1545,49 @@ public class OpenPrefirePrac : BasePlugin
         player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White}{_translator!.Translate(player, "practice.exit")}");
     }
 
+    public void MenuOpenGunMenu(CCSPlayerController player, ChatMenuOption option)
+    {
+        OpenGunMenu(player);
+    }
+
+    private void OpenGunMenu(CCSPlayerController player)
+    {
+        player.PrintToChat("================== [HIME] =================");
+        var gunMenu = new ChatMenu($"---主武器菜单");
+        MenuHelper.GetGuns(gunMenu);
+        ChatMenus.OpenMenu(player, gunMenu);
+        player.PrintToChat("===========================================");
+    }
+
+    [ConsoleCommand("gun")]
+    [ConsoleCommand("guns")]
+    [ConsoleCommand("rifles")]
+    [ConsoleCommand("primary")]
+    public void Rifles(CCSPlayerController? player, CommandInfo info)
+    {
+        if (ValidatePlayer(player) == false)
+        {
+            return;
+        }
+
+        OpenGunMenu(player);
+    }
+
+    private static bool ValidatePlayer(CCSPlayerController? player)
+    {
+        if (player == null || player.IsBot || !player.IsValid)
+        {
+            return false;
+        }
+
+        if (player.PawnIsAlive == false)
+        {
+            player.PrintToChat("Only alive players can call this command");
+            return false;
+        }
+        return true;
+    }
+
     private void UnregisterCommand()
     {
         if (_command == null)
@@ -1640,6 +1692,7 @@ public class OpenPrefirePrac : BasePlugin
             var currentTrainingMode = _translator.Translate(player, $"modemenu.{_playerStatuses[player].TrainingMode}");
             mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.mode", currentTrainingMode), OpenModeMenu);
             //mainMenu.AddMenuOption("Language preference", OpenLanguageMenu);
+            mainMenu.AddMenuOption("选择主武器", MenuOpenGunMenu);
             mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.exit"), OnForceExitPrefireMode);
             player.PrintToChat("================== [HIME] =================");
             MenuManager.OpenChatMenu(player, mainMenu);

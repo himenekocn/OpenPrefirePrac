@@ -44,4 +44,6 @@ public class PlayerStatus
     {
         // Default constructor
     }
+
+    private Weapon PlayerWeapon;
 }
