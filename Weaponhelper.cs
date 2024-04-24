@@ -32,7 +32,6 @@ public static class WeaponHelper
                 {"AWP",                                new("weapon_awp",          WeaponType.Primary)},
                 {"M4A4",                               new("weapon_m4a1",          WeaponType.Primary)},
                 {"M4A1-S",                             new("weapon_m4a1_silencer",          WeaponType.Primary)},
-                {"SG 553",                             new("weapon_sg553",          WeaponType.Primary)},
                 {"AUG",                                new("weapon_aug",          WeaponType.Primary)},
                 {"SSG 08",                             new("weapon_ssg08",          WeaponType.Primary)},
                 {"Negev",                              new("weapon_negev",          WeaponType.Primary)},
@@ -46,7 +45,7 @@ public static class WeaponHelper
                 {"P90",                                new("weapon_p90",          WeaponType.Primary)},
                 {"MP7",                                new("weapon_mp7",          WeaponType.Primary)},
                 {"MAC-10",                             new("weapon_mac10",          WeaponType.Primary)},
-                {"sg556",                              new("weapon_sg556",          WeaponType.Primary)},
+                {"SG 553",                             new("weapon_sg556",          WeaponType.Primary)},
                 {"G3SG1",                              new("weapon_g3sg1",          WeaponType.Primary)},
                 {"SCAR-20",                            new("weapon_scar20" ,          WeaponType.Primary)},
                 {"XM1014",                             new("weapon_xm1014",          WeaponType.Primary)},
@@ -72,7 +71,6 @@ public static class WeaponHelper
                 {"weapon_awp",                         new("weapon_awp",          WeaponType.Primary)},
                 {"weapon_m4a1",                        new("weapon_m4a1",          WeaponType.Primary)},
                 {"weapon_m4a1_silencer",               new("weapon_m4a1_silencer",          WeaponType.Primary)},
-                {"weapon_sg553",                       new("weapon_sg553",          WeaponType.Primary)},
                 {"weapon_aug",                         new("weapon_aug",          WeaponType.Primary)},
                 {"weapon_ssg08",                       new("weapon_ssg08",          WeaponType.Primary)},
                 {"weapon_negev",                       new("weapon_negev",          WeaponType.Primary)},
@@ -127,7 +125,14 @@ public static class MenuHelper
         {
             RemoveCurrentWeapon(player, selectedWeapon);
             player.GiveNamedItem(selectedWeapon.GiveName);
-            OpenPrefirePrac._playerWeapon[player] = selectedWeapon;
+            if(selectedWeapon.Type == WeaponType.Primary)
+            {
+                OpenPrefirePrac._playerWeapon[player] = selectedWeapon;
+            }
+            if(selectedWeapon.Type == WeaponType.Secondary)
+            {
+                OpenPrefirePrac._playerPWeapon[player] = selectedWeapon;
+            }
         }
     }
 

@@ -29,6 +29,7 @@ public class OpenPrefirePrac : BasePlugin
     private readonly Dictionary<int, bool> _practiceEnabled = new();
 
     public static Dictionary<CCSPlayerController, Weapon> _playerWeapon = new();
+    public static Dictionary<CCSPlayerController, Weapon> _playerPWeapon = new();
 
     private string _mapName = "";
 
@@ -80,6 +81,7 @@ public class OpenPrefirePrac : BasePlugin
             _playerStatuses.Clear();
             _botRequests.Clear();
             _playerWeapon.Clear();
+            _playerPWeapon.Clear();
 
             // Clear saved convars
             _serverStatus.WarmupStatus = true;
@@ -127,6 +129,7 @@ public class OpenPrefirePrac : BasePlugin
             _playerStatuses.Clear();
             _botRequests.Clear();
             _playerWeapon.Clear();
+            _playerPWeapon.Clear();
 
             // Clear saved convars
             _serverStatus.WarmupStatus = true;
@@ -266,6 +269,8 @@ public class OpenPrefirePrac : BasePlugin
             {
                 _playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
                 _playerWeapon.Add(player, new Weapon("weapon_ak47"));
+                _playerPWeapon.Add(player, new Weapon("weapon_deagle"));
+                
                 _translator!.RecordPlayerCulture(player);
             }
             Console.WriteLine($"[HIME] =======================================.");
@@ -291,6 +296,11 @@ public class OpenPrefirePrac : BasePlugin
         if (_playerWeapon.ContainsKey(player))
         {
             _playerWeapon.Remove(player);
+        }
+
+        if (_playerPWeapon.ContainsKey(player))
+        {
+            _playerPWeapon.Remove(player);
         }
 
         if (_botRequests.ContainsKey(player))
@@ -994,7 +1004,15 @@ public class OpenPrefirePrac : BasePlugin
         {
             player.GiveNamedItem("weapon_ak47");
         }
-        player.GiveNamedItem("weapon_deagle");
+        if (_playerPWeapon.ContainsKey(player))
+        {
+            player.GiveNamedItem(_playerPWeapon[player].GiveName);
+        }
+        else
+        {
+            player.GiveNamedItem("weapon_deagle");
+        }
+        
         player.GiveNamedItem("weapon_knife");
         player.GiveNamedItem("weapon_flashbang");
         player.GiveNamedItem("weapon_flashbang");
@@ -1124,7 +1142,7 @@ public class OpenPrefirePrac : BasePlugin
         ];
 
         string[] intConvarNames = [
-            "mp_buy_anywhere",
+            //"mp_buy_anywhere",
             //"mp_warmup_pausetimer",
             "mp_free_armor",
             "mp_limitteams",
@@ -1139,7 +1157,7 @@ public class OpenPrefirePrac : BasePlugin
 
         string[] floatConvarNames = [
             "mp_respawn_immunitytime",
-            "mp_buytime",
+            //"mp_buytime",
         ];
 
         string[] stringConvarNames = [
@@ -1291,7 +1309,7 @@ public class OpenPrefirePrac : BasePlugin
         Server.ExecuteCommand("sv_alltalk 1");
         Server.ExecuteCommand("sv_full_alltalk 1");
 
-        Server.ExecuteCommand("mp_buy_anywhere 1");
+        Server.ExecuteCommand("mp_buy_anywhere 0");
         Server.ExecuteCommand("mp_warmup_pausetimer 1");
         Server.ExecuteCommand("mp_free_armor 2");
         Server.ExecuteCommand("mp_limitteams 0");
@@ -1304,7 +1322,7 @@ public class OpenPrefirePrac : BasePlugin
         Server.ExecuteCommand("mp_death_drop_grenade 0");
 
         Server.ExecuteCommand("mp_respawn_immunitytime -1");
-        Server.ExecuteCommand("mp_buytime 9999");
+        Server.ExecuteCommand("mp_buytime 0");
 
         Server.ExecuteCommand("bot_quota_mode normal");
 
@@ -1556,7 +1574,7 @@ public class OpenPrefirePrac : BasePlugin
     {
         player.PrintToChat("================== [HIME] =================");
         var gunMenu = new ChatMenu($"---主武器菜单");
-        MenuHelper.GetGuns(gunMenu);
+        MenuHelper.GetGuns(gunMenu, WeaponType.Primary);
         ChatMenus.OpenMenu(player, gunMenu);
         player.PrintToChat("===========================================");
     }
@@ -1573,6 +1591,32 @@ public class OpenPrefirePrac : BasePlugin
         }
 
         OpenGunMenu(player);
+    }
+
+    public void MenuOpenPistolsMenu(CCSPlayerController player, ChatMenuOption option)
+    {
+        OpenPistolsMenu(player);
+    }
+
+    private void OpenPistolsMenu(CCSPlayerController player)
+    {
+        player.PrintToChat("================== [HIME] =================");
+        var gunMenu = new ChatMenu($"---副武器菜单");
+        MenuHelper.GetGuns(gunMenu, WeaponType.Primary);
+        ChatMenus.OpenMenu(player, gunMenu);
+        player.PrintToChat("===========================================");
+    }
+
+    [ConsoleCommand("pistols")]
+    [ConsoleCommand("secondary")]
+    public void Pistols(CCSPlayerController? player, CommandInfo info)
+    {
+        if (ValidatePlayer(player) == false)
+        {
+            return;
+        }
+
+        OpenPistolsMenu(player);
     }
 
     private static bool ValidatePlayer(CCSPlayerController? player)
@@ -1696,6 +1740,7 @@ public class OpenPrefirePrac : BasePlugin
             mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.mode", currentTrainingMode), OpenModeMenu);
             //mainMenu.AddMenuOption("Language preference", OpenLanguageMenu);
             mainMenu.AddMenuOption("选择主武器", MenuOpenGunMenu);
+            mainMenu.AddMenuOption("选择副武器", MenuOpenPistolsMenu);
             mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.exit"), OnForceExitPrefireMode);
             player.PrintToChat("================== [HIME] =================");
             MenuManager.OpenChatMenu(player, mainMenu);
