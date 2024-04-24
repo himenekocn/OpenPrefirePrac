@@ -170,7 +170,7 @@ public class OpenPrefirePrac : BasePlugin
         }
         catch (Exception ex)
         {
-            if (ex.Message != "Invalid game event") Console.WriteLine("[HIME] TimerOnTick :{ex.Message}"");
+            if (ex.Message != "Invalid game event") Console.WriteLine("[HIME] TimerOnTick :{ex.Message}");
         }
     }
 
