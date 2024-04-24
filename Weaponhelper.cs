@@ -129,7 +129,7 @@ public partial class OpenPrefirePrac
             {
                 RemoveCurrentWeapon(player, selectedWeapon);
                 player.GiveNamedItem(selectedWeapon.GiveName);
-                _playerStatuses[player].PlayerWeapon = selectedWeapon;
+                OpenPrefirePrac._playerStatuses[player].PlayerWeapon = selectedWeapon;
             }
         }
 

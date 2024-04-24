@@ -984,9 +984,9 @@ public partial class OpenPrefirePrac : BasePlugin
         player.RemoveWeapons();
 
         // Give weapons and items
-        if(_playerStatuses[player].PlayerWeapon.GiveName != null)
+        if(OpenPrefirePrac._playerStatuses[player].PlayerWeapon.GiveName != null)
         {
-            player.GiveNamedItem(_playerStatuses[player].PlayerWeapon.GiveName);
+            player.GiveNamedItem(OpenPrefirePrac._playerStatuses[player].PlayerWeapon.GiveName);
         }
         else
         {
