@@ -23,7 +23,7 @@ public partial class OpenPrefirePrac
         public string GiveName { get; set; }
     }
 
-    private static class WeaponHelper
+    public static class WeaponHelper
     {
         internal static (Dictionary<string, Weapon> Weapons, Dictionary<string, Weapon> WeaponCheckers) LoadWeapons()
         {
@@ -90,7 +90,7 @@ public partial class OpenPrefirePrac
         }
     }
 
-    private static class MenuHelper
+    public static class MenuHelper
     {
         private static Dictionary<string, Weapon> _weapons;
         private static Dictionary<string, Weapon> _weaponCheckers;
