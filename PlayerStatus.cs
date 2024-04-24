@@ -21,7 +21,7 @@ public class PlayerStatus
         public WeaponType Type { get; set; }
         public string GiveName { get; set; }
     }
-    
+
     /**
      * -1 if player is not practicing
      */
@@ -63,5 +63,5 @@ public class PlayerStatus
         // Default constructor
     }
 
-    private Weapon PlayerWeapon;
+    public Weapon PlayerWeapon;
 }
