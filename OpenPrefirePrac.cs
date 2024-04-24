@@ -61,6 +61,7 @@ public class OpenPrefirePrac : BasePlugin
 
         Console.WriteLine("[HIME] Registering listeners.");
         RegisterListener<Listeners.OnClientPutInServer>(OnClientPutInServerHandler);
+        RegisterListener<Listeners.OnClientConnect>(OnClientConnectHandler);
         RegisterListener<Listeners.OnClientDisconnect>(OnClientDisconnectHandler);
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
 
@@ -183,6 +184,29 @@ public class OpenPrefirePrac : BasePlugin
         return players;
     }
 
+    public void OnClientConnectHandler(int slot, string name, string ipAddress)
+    {
+        var player = new CCSPlayerController(NativeAPI.GetEntityFromIndex(slot + 1));
+
+        if (!player.IsValid || player.IsHLTV || player.IsBot)
+        {
+            return;
+        }
+
+        _SerplayerCount++;
+
+        Console.WriteLine($"[HIME] =======================================.");
+        Console.WriteLine($"[HIME] Connect Get Players Now Count {_SerplayerCount}.");
+
+        if (_SerplayerCount > 2)
+        {
+            Console.WriteLine($"[HIME] Full Player kick {player.PlayerName}.");
+            Server.ExecuteCommand($"kickid {player.UserId}");
+        }
+
+        Console.WriteLine($"[HIME] =======================================.");
+    }
+
     public void OnClientDisconnectHandler(int slot)
     {
         var player = new CCSPlayerController(NativeAPI.GetEntityFromIndex(slot + 1));
@@ -206,7 +230,6 @@ public class OpenPrefirePrac : BasePlugin
         }
 
         Console.WriteLine($"[HIME] =======================================.");
-        //int playercount = GetOnlinePlayers().Count();
         Console.WriteLine($"[HIME] Disconnect Get Players Count {_SerplayerCount}.");
         Console.WriteLine($"[HIME] =======================================.");
     }
@@ -255,30 +278,15 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
-            _SerplayerCount++;
-            //int playercount = GetOnlinePlayers().Count();
             Console.WriteLine($"[HIME] =======================================.");
-            Console.WriteLine($"[HIME] Connect Get Players Now Count {_SerplayerCount}.");
-            //foreach (var players in GetOnlinePlayers().Where(players => players is { IsValid: true, IsBot: false, IsHLTV: false }))
-            //{
-            //	Console.WriteLine($"[HIME] OnlinePlayer: {players.PlayerName}.");
-            //}
-            if (_SerplayerCount > 2)
+            Console.WriteLine($"[HIME] Putin Get Players Count {_SerplayerCount}.");
+            Console.WriteLine($"[HIME] =======================================.");
+            if (player.Connected == PlayerConnectedState.PlayerConnected)
             {
-                Console.WriteLine($"[HIME] Full Player kick {player.PlayerName}.");
-                Server.ExecuteCommand($"kickid {player.UserId}");
-            }
-            else
-            {
-                //_SerplayerCount++;
-                //Console.WriteLine($"[HIME] Join Get Players Count Renew {_SerplayerCount}.");
-                // For players:
                 _playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
                 _playerWeapon.Add(player, new Weapon("weapon_ak47"));
-                // Record player language
                 _translator!.RecordPlayerCulture(player);
             }
-            Console.WriteLine($"[HIME] =======================================.");
         }
     }
 
