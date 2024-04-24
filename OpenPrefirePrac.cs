@@ -6,6 +6,7 @@ using CounterStrikeSharp.API.Modules.Menu;
 using CounterStrikeSharp.API.Modules.Utils;
 using CounterStrikeSharp.API.Modules.Memory;
 using Vector = CounterStrikeSharp.API.Modules.Utils.Vector;
+using Microsoft.Extensions.Logging;
 using System.Globalization;
 using CounterStrikeSharp.API.Modules.Cvars;
 using System.Text.Json;
@@ -170,7 +171,11 @@ public class OpenPrefirePrac : BasePlugin
         }
         catch (Exception ex)
         {
-            if (ex.Message != "Invalid game event") Console.WriteLine("[HIME] TimerOnTick :{ex.Message}");
+            if (ex.Message != "Invalid game event") 
+            {
+                Console.WriteLine("[HIME] TimerOnTick :{ex.Message}");
+                Logger.LogInformation("[HIME] TimerOnTick :{ex.Message}")
+            }
         }
     }
 
@@ -1535,7 +1540,11 @@ public class OpenPrefirePrac : BasePlugin
         }
         catch (Exception ex)
         {
-           if (ex.Message != "Invalid game event") Console.WriteLine("[HIME] Error in StartPrac:{ex.Message}");
+           if (ex.Message != "Invalid game event")
+           {
+               Console.WriteLine("[HIME] Error in StartPrac:{ex.Message}");
+               Logger.LogInformation("[HIME] Error in StartPrac :{ex.Message}")
+           }
         }
     }
 
