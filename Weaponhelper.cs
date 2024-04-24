@@ -3,31 +3,29 @@ using CounterStrikeSharp.API.Modules.Menu;
 
 namespace OpenPrefirePrac;
 
-public partial class OpenPrefirePrac
+public enum WeaponType
 {
-    public enum WeaponType
+    Primary = 0,
+    Secondary = 1,
+}
+
+public class Weapon
+{
+    public Weapon(string giveName, WeaponType type = WeaponType.Primary)
     {
-        Primary = 0,
-        Secondary = 1,
+        Type = type;
+        GiveName = giveName;
     }
 
-    public class Weapon
-    {
-        public Weapon(string giveName, WeaponType type = WeaponType.Primary)
-        {
-            Type = type;
-            GiveName = giveName;
-        }
+    public WeaponType Type { get; set; }
+    public string GiveName { get; set; }
+}
 
-        public WeaponType Type { get; set; }
-        public string GiveName { get; set; }
-    }
-
-    public static class WeaponHelper
+public static class WeaponHelper
+{
+    internal static (Dictionary<string, Weapon> Weapons, Dictionary<string, Weapon> WeaponCheckers) LoadWeapons()
     {
-        internal static (Dictionary<string, Weapon> Weapons, Dictionary<string, Weapon> WeaponCheckers) LoadWeapons()
-        {
-            var weapons = new Dictionary<string, Weapon>(StringComparer.InvariantCultureIgnoreCase)
+        var weapons = new Dictionary<string, Weapon>(StringComparer.InvariantCultureIgnoreCase)
             {
                 {"AK-47",                              new("weapon_ak47")},
                 {"AWP",                                new("weapon_awp")},
@@ -57,7 +55,7 @@ public partial class OpenPrefirePrac
                 {"Nova",                               new("weapon_nova")},
             };
 
-            var weaponCheckers = new Dictionary<string, Weapon>(StringComparer.InvariantCultureIgnoreCase)
+        var weaponCheckers = new Dictionary<string, Weapon>(StringComparer.InvariantCultureIgnoreCase)
             {
                 {"weapon_ak47",                        new("weapon_ak47")},
                 {"weapon_awp",                         new("weapon_awp")},
@@ -86,66 +84,65 @@ public partial class OpenPrefirePrac
                 {"weapon_sawedoff",                    new("weapon_sawedoff")},
                 {"weapon_nova",                        new("weapon_nova")},
             };
-            return (weapons, weaponCheckers);
+        return (weapons, weaponCheckers);
+    }
+}
+
+public static class MenuHelper
+{
+    private static Dictionary<string, Weapon> _weapons;
+    private static Dictionary<string, Weapon> _weaponCheckers;
+
+    private static void GiveSelectedItem(CCSPlayerController player, ChatMenuOption option)
+    {
+        if (player == null
+            || player.IsValid == false
+            || player.IsBot == true
+            || player?.PlayerPawn?.Value?.WeaponServices?.MyWeapons == null)
+        {
+            return;
+        }
+        if (_weapons.TryGetValue(option.Text, out var selectedWeapon))
+        {
+            RemoveCurrentWeapon(player, selectedWeapon);
+            player.GiveNamedItem(selectedWeapon.GiveName);
+            OpenPrefirePrac._playerWeapon[player] = selectedWeapon;
         }
     }
 
-    public static class MenuHelper
+    static MenuHelper()
     {
-        private static Dictionary<string, Weapon> _weapons;
-        private static Dictionary<string, Weapon> _weaponCheckers;
+        var res = WeaponHelper.LoadWeapons();
+        _weapons = res.Weapons;
+        _weaponCheckers = res.WeaponCheckers;
+    }
 
-        static MenuHelper()
+    internal static void GetGuns(ChatMenu gunMenu, WeaponType? type = null)
+    {
+        Dictionary<string, Weapon> weapons = _weapons;
+        if (type != null)
         {
-            var res = WeaponHelper.LoadWeapons();
-            _weapons = res.Weapons;
-            _weaponCheckers = res.WeaponCheckers;
+            weapons = _weapons.Where(x => x.Value.Type == type.Value)
+                              .ToDictionary(x => x.Key, y => y.Value);
         }
-
-        internal static void GetGuns(ChatMenu gunMenu, WeaponType? type = null)
+        foreach (var item in weapons)
         {
-            Dictionary<string, Weapon> weapons = _weapons;
-            if (type != null)
-            {
-                weapons = _weapons.Where(x => x.Value.Type == type.Value)
-                                  .ToDictionary(x => x.Key, y => y.Value);
-            }
-            foreach (var item in weapons)
-            {
-                gunMenu.AddMenuOption(item.Key, GiveSelectedItem);
-            }
+            gunMenu.AddMenuOption(item.Key, GiveSelectedItem);
         }
+    }
 
-        private static void GiveSelectedItem(CCSPlayerController player, ChatMenuOption option)
+    private static void RemoveCurrentWeapon(CCSPlayerController? player, Weapon selectedWeapon)
+    {
+        foreach (var weapon in player!.PlayerPawn.Value!.WeaponServices!.MyWeapons)
         {
-            if (player == null
-                || player.IsValid == false
-                || player.IsBot == true
-                || player?.PlayerPawn?.Value?.WeaponServices?.MyWeapons == null)
+            if (weapon.Value != null &&
+                string.IsNullOrWhiteSpace(weapon.Value.DesignerName) == false &&
+                weapon.Value.DesignerName != "[null]" &&
+                _weaponCheckers.TryGetValue(weapon.Value.DesignerName, out var currentWeapon))
             {
-                return;
-            }
-            if (_weapons.TryGetValue(option.Text, out var selectedWeapon))
-            {
-                RemoveCurrentWeapon(player, selectedWeapon);
-                player.GiveNamedItem(selectedWeapon.GiveName);
-                _playerWeapon[player] = selectedWeapon;
-            }
-        }
-
-        private static void RemoveCurrentWeapon(CCSPlayerController? player, Weapon selectedWeapon)
-        {
-            foreach (var weapon in player!.PlayerPawn.Value!.WeaponServices!.MyWeapons)
-            {
-                if (weapon.Value != null &&
-                    string.IsNullOrWhiteSpace(weapon.Value.DesignerName) == false &&
-                    weapon.Value.DesignerName != "[null]" &&
-                    _weaponCheckers.TryGetValue(weapon.Value.DesignerName, out var currentWeapon))
+                if (currentWeapon.Type == selectedWeapon.Type)
                 {
-                    if (currentWeapon.Type == selectedWeapon.Type)
-                    {
-                        weapon.Value.Remove();
-                    }
+                    weapon.Value.Remove();
                 }
             }
         }

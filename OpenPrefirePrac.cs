@@ -13,7 +13,7 @@ using CounterStrikeSharp.API.Core.Commands;
 
 namespace OpenPrefirePrac;
 
-public partial class OpenPrefirePrac : BasePlugin
+public class OpenPrefirePrac : BasePlugin
 {
     public override string ModuleName => "Open Prefire Prac";
     public override string ModuleVersion => "0.1.28c";
@@ -28,7 +28,7 @@ public partial class OpenPrefirePrac : BasePlugin
 
     private readonly Dictionary<int, bool> _practiceEnabled = new();
 
-    private readonly Dictionary<CCSPlayerController, Weapon> _playerWeapon = new();
+    public static Dictionary<CCSPlayerController, Weapon> _playerWeapon = new();
 
     private string _mapName = "";
 
