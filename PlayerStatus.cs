@@ -1,11 +1,27 @@
 using CounterStrikeSharp.API.Core;
-using OpenPrefirePrac.Weapon;
 
 namespace OpenPrefirePrac;
 
 public class PlayerStatus
 {
+    public enum WeaponType
+    {
+        Primary = 0,
+        Secondary = 1,
+    }
 
+    public class Weapon
+    {
+        public Weapon(string giveName, WeaponType type = WeaponType.Primary)
+        {
+            Type = type;
+            GiveName = giveName;
+        }
+
+        public WeaponType Type { get; set; }
+        public string GiveName { get; set; }
+    }
+    
     /**
      * -1 if player is not practicing
      */
