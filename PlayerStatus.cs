@@ -63,5 +63,5 @@ public class PlayerStatus
         // Default constructor
     }
 
-    public Weapon PlayerWeapon;
+    public Weapon PlayerWeapon = new();
 }
