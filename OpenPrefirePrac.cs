@@ -61,7 +61,6 @@ public class OpenPrefirePrac : BasePlugin
 
         Console.WriteLine("[HIME] Registering listeners.");
         RegisterListener<Listeners.OnClientPutInServer>(OnClientPutInServerHandler);
-        RegisterListener<Listeners.OnClientConnect>(OnClientConnectHandler);
         RegisterListener<Listeners.OnClientDisconnect>(OnClientDisconnectHandler);
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
 
@@ -157,8 +156,7 @@ public class OpenPrefirePrac : BasePlugin
             }
         }
 
-        foreach (var bot in Utilities.GetPlayers()
-                        .Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
+        foreach (var bot in Utilities.GetPlayers().Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
         {
             RefillAmmo(bot);
             //Console.WriteLine($"[HIME] GetBot {bot.PlayerName}");
@@ -181,29 +179,6 @@ public class OpenPrefirePrac : BasePlugin
         }
 
         return players;
-    }
-
-    public void OnClientConnectHandler(int slot, string name, string ipAddress)
-    {
-        var player = new CCSPlayerController(NativeAPI.GetEntityFromIndex(slot + 1));
-
-        if (!player.IsValid || player.IsHLTV || player.IsBot)
-        {
-            return;
-        }
-
-        _SerplayerCount++;
-
-        Console.WriteLine($"[HIME] =======================================.");
-        Console.WriteLine($"[HIME] Connect Get Players Now Count {_SerplayerCount}.");
-
-        if (_SerplayerCount > 2)
-        {
-            Console.WriteLine($"[HIME] Full Player kick {player.PlayerName}.");
-            Server.ExecuteCommand($"kickid {player.UserId}");
-        }
-
-        Console.WriteLine($"[HIME] =======================================.");
     }
 
     public void OnClientDisconnectHandler(int slot)
@@ -277,15 +252,23 @@ public class OpenPrefirePrac : BasePlugin
         }
         else
         {
+            _SerplayerCount++;
+
             Console.WriteLine($"[HIME] =======================================.");
-            Console.WriteLine($"[HIME] Putin Get Players Count {_SerplayerCount}.");
-            Console.WriteLine($"[HIME] =======================================.");
-            if (player.Connected == PlayerConnectedState.PlayerConnected)
+            Console.WriteLine($"[HIME] Connect Get Players Now Count {_SerplayerCount}.");
+
+            if (_SerplayerCount > 2)
+            {
+                Console.WriteLine($"[HIME] Full Player kick {player.PlayerName}.");
+                Server.ExecuteCommand($"kickid {player.UserId}");
+            }
+            else
             {
                 _playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
                 _playerWeapon.Add(player, new Weapon("weapon_ak47"));
                 _translator!.RecordPlayerCulture(player);
             }
+            Console.WriteLine($"[HIME] =======================================.");
         }
     }
 
