@@ -28,6 +28,8 @@ public partial class OpenPrefirePrac : BasePlugin
 
     private readonly Dictionary<int, bool> _practiceEnabled = new();
 
+    private readonly Dictionary<CCSPlayerController, Weapon> _playerWeapon = new();
+
     private string _mapName = "";
 
     private int _playerCount;
@@ -77,6 +79,7 @@ public partial class OpenPrefirePrac : BasePlugin
             _SerplayerCount = 0;
             _playerStatuses.Clear();
             _botRequests.Clear();
+            _playerWeapon.Clear();
 
             // Clear saved convars
             _serverStatus.WarmupStatus = true;
@@ -123,6 +126,7 @@ public partial class OpenPrefirePrac : BasePlugin
             _SerplayerCount = 0;
             _playerStatuses.Clear();
             _botRequests.Clear();
+            _playerWeapon.Clear();
 
             // Clear saved convars
             _serverStatus.WarmupStatus = true;
@@ -269,7 +273,7 @@ public partial class OpenPrefirePrac : BasePlugin
                 //Console.WriteLine($"[HIME] Join Get Players Count Renew {_SerplayerCount}.");
                 // For players:
                 _playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
-
+                _playerWeapon.Add(player, new Weapon("weapon_ak47"));
                 // Record player language
                 _translator!.RecordPlayerCulture(player);
             }
@@ -292,6 +296,12 @@ public partial class OpenPrefirePrac : BasePlugin
 
         // Release resources(practices, targets, bots...)
         _playerStatuses.Remove(player);
+
+        if (_playerWeapon.ContainsKey(player))
+        {
+            _playerWeapon.Remove(player);
+        }
+
         if (_botRequests.ContainsKey(player))
         {
             _botRequests.Remove(player);
@@ -984,9 +994,10 @@ public partial class OpenPrefirePrac : BasePlugin
         player.RemoveWeapons();
 
         // Give weapons and items
-        if(_playerStatuses[player].PlayerWeapon.GiveName != null)
+
+        if(_playerWeapon.ContainsKey(player))
         {
-            player.GiveNamedItem(_playerStatuses[player].PlayerWeapon.GiveName);
+            player.GiveNamedItem(_playerStatuses[player].GiveName);
         }
         else
         {
