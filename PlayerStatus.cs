@@ -1,10 +1,11 @@
 using CounterStrikeSharp.API.Core;
-using OpenPrefirePrac;
+using OpenPrefirePrac.Weapon;
 
 namespace OpenPrefirePrac;
 
 public class PlayerStatus
 {
+
     /**
      * -1 if player is not practicing
      */
