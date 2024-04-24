@@ -13,7 +13,7 @@ using CounterStrikeSharp.API.Core.Commands;
 
 namespace OpenPrefirePrac;
 
-public class OpenPrefirePrac : BasePlugin
+public partial class OpenPrefirePrac : BasePlugin
 {
     public override string ModuleName => "Open Prefire Prac";
     public override string ModuleVersion => "0.1.28c";
