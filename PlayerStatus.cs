@@ -31,13 +31,23 @@ public class PlayerStatus
     public int TrainingMode = 0;
 
     public readonly Dictionary<string, int> LocalizedTrainingModeNames = new();
+
     public readonly List<int> EnabledTargets = new();
     public readonly List<int> Beams = new();
 
+    /**
+     * 0: Bots buy weapons randomly.
+     * 1: Bots use UMP45.
+     * 2: Bots use AK47.
+     * 3: Bots use AWP.
+     */
+    public int BotWeapon = 0;
+
     public PlayerStatus(DefaultConfig defaultConfig)
     {
-        HealingMethod = defaultConfig.Difficulty;
-        TrainingMode = defaultConfig.TrainingMode;
+        HealingMethod = defaultConfig.Difficulty!.Value;
+        TrainingMode = defaultConfig.TrainingMode!.Value;
+        BotWeapon = defaultConfig.BotWeapon!.Value;
     }
 
     public PlayerStatus()
