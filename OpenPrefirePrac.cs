@@ -1305,6 +1305,8 @@ public class OpenPrefirePrac : BasePlugin
 
     private void SetupConvars()
     {
+        Server.ExecuteCommand("sv_disconnected_players_cleanup_delay 1");
+
         Server.ExecuteCommand("tv_enable 0");
         // Server.ExecuteCommand("sv_cheats 1");
         Server.ExecuteCommand("bot_allow_grenades 0");

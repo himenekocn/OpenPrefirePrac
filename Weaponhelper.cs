@@ -133,6 +133,7 @@ public static class MenuHelper
             {
                 OpenPrefirePrac._playerPWeapon[player] = selectedWeapon;
             }
+            MenuManager.CloseActiveMenu(player);
         }
     }
 
