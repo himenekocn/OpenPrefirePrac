@@ -18,7 +18,7 @@ public class PlayerStatus
      * 3: +100hp for each kill (default)
      * 4: +500hp for each kill
      */
-    public int HealingMethod = 3;
+    public int HealingMethod = 2;
 
     public readonly List<CCSPlayerController> Bots = new();
     public readonly Dictionary<string, int> LocalizedPracticeNames = new();

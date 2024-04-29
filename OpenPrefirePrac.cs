@@ -167,6 +167,8 @@ public class OpenPrefirePrac : BasePlugin
 
             foreach (var bot in Utilities.GetPlayers().Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
             {
+                bot.Clan = "HIME-BOT";
+                bot.ClanName = "HIME-BOT";
                 CCSBot Getbot = bot.PlayerPawn.Value!.Bot!;
                 RefillAmmo(bot);
                 if (Getbot.IsEnemyVisible)
@@ -181,7 +183,7 @@ public class OpenPrefirePrac : BasePlugin
         {
             if (ex.Message != "Invalid game event")
             {
-                Logger.LogInformation("[HIME] TimerOnTick :{}" + ex.Message);
+                Logger.LogInformation("[HIME] TimerOnTick :" + ex.Message);
             }
         }
     }
@@ -507,8 +509,10 @@ public class OpenPrefirePrac : BasePlugin
                                 case 4:
                                     currentHp = currentHp + 500;
                                     break;
-                                default:
+                                case 3:
                                     currentHp = currentHp + 100;
+                                    break;
+                                default:
                                     break;
                             }
                             SetPlayerHealth(owner, currentHp);
