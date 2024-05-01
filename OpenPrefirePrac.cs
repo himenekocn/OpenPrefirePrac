@@ -209,7 +209,7 @@ public class OpenPrefirePrac : BasePlugin
     {
         var player = new CCSPlayerController(NativeAPI.GetEntityFromIndex(slot + 1));
 
-        if (!player.IsValid || player.IsHLTV || player.IsBot)
+        if (player == null || !player.IsValid || player.IsHLTV || player.IsBot)
         {
             return;
         }
@@ -238,7 +238,7 @@ public class OpenPrefirePrac : BasePlugin
     {
         var player = new CCSPlayerController(NativeAPI.GetEntityFromIndex(slot + 1));
 
-        if (!player.IsValid || player.IsHLTV)
+        if (player == null || !player.IsValid || player.IsHLTV)
         {
             return;
         }
@@ -368,7 +368,7 @@ public class OpenPrefirePrac : BasePlugin
     {
         var playerOrBot = @event.Userid;
 
-        if (!playerOrBot.IsValid || playerOrBot.IsHLTV)
+        if (playerOrBot == null || !playerOrBot.IsValid || playerOrBot.IsHLTV)
         {
             return HookResult.Continue;
         }
@@ -476,7 +476,7 @@ public class OpenPrefirePrac : BasePlugin
     {
         var playerOrBot = @event.Userid;
 
-        if (!playerOrBot.IsValid || playerOrBot.IsHLTV)
+        if (playerOrBot == null || !playerOrBot.IsValid || playerOrBot.IsHLTV)
         {
             return HookResult.Continue;
         }
