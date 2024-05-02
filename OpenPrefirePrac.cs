@@ -421,7 +421,7 @@ public class OpenPrefirePrac : BasePlugin
                     }
 
                     // Try to increase bot difficulty
-                    playerOrBot.PlayerPawn.Value!.Bot!.CombatRange = 2000;
+                    //playerOrBot.PlayerPawn.Value!.Bot!.CombatRange = 2000;
                     playerOrBot.ExecuteClientCommand("slot2");
                     playerOrBot.ExecuteClientCommand("slot1");
                 }
