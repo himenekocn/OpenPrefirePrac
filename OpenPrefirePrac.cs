@@ -422,7 +422,7 @@ public class OpenPrefirePrac : BasePlugin
                     }
 
                     // Try to increase bot difficulty
-                    playerOrBot.PlayerPawn.Value!.Bot!.CombatRange = 2000;
+                    //playerOrBot.PlayerPawn.Value!.Bot!.CombatRange = 2000;
                     playerOrBot.ExecuteClientCommand("slot2");
                     playerOrBot.ExecuteClientCommand("slot1");
                 }
@@ -908,8 +908,8 @@ public class OpenPrefirePrac : BasePlugin
             && bot.PlayerPawn.Value != null
         )
         {
-            bot.PlayerPawn.Value.MoveType = MoveType_t.MOVETYPE_VPHYSICS;
-            Schema.SetSchemaValue(bot.PlayerPawn.Value.Handle, "CBaseEntity", "m_nActualMoveType", 5);
+            bot.PlayerPawn.Value.MoveType = MoveType_t.MOVETYPE_NONE;
+            Schema.SetSchemaValue(bot.PlayerPawn.Value.Handle, "CBaseEntity", "m_nActualMoveType", 0);
             Utilities.SetStateChanged(bot.PlayerPawn.Value, "CBaseEntity", "m_MoveType");
         }
     }
