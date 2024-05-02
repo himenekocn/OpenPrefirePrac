@@ -171,12 +171,13 @@ public class OpenPrefirePrac : BasePlugin
                 bot.ClanName = "HIME-BOT";
                 CCSBot Getbot = bot.PlayerPawn.Value!.Bot!;
                 RefillAmmo(bot);
+                /*
                 if (Getbot.IsEnemyVisible)
                 {
                     PlayerButtons getbuttons = bot.Buttons;
                     getbuttons |= PlayerButtons.Attack;
                     Schema.SetSchemaValue<PlayerButtons>(bot.Handle, "CPlayer_MovementServices", "m_nButtons", getbuttons);
-                }
+                }*/
             }
         }
         catch (Exception ex)
