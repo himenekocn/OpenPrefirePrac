@@ -391,7 +391,7 @@ public class OpenPrefirePrac : BasePlugin
                             .IsCrouching,
                         _practices[practiceIndex].Targets[_playerStatuses[owner].EnabledTargets[targetNo]].Position,
                         _practices[practiceIndex].Targets[_playerStatuses[owner].EnabledTargets[targetNo]]
-                            .Rotation);
+                            .Rotation));
 
                     AddTimer(0.55f, () => FreezeBot(playerOrBot));
 
