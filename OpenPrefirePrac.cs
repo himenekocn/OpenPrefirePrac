@@ -12,13 +12,14 @@ using CounterStrikeSharp.API.Modules.Cvars;
 using System.Text.Json;
 using CounterStrikeSharp.API.Core.Commands;
 using CounterStrikeSharp.API.Modules.Timers;
+using CounterStrikeSharp.API.Modules.Entities;
 
 namespace OpenPrefirePrac;
 
 public class OpenPrefirePrac : BasePlugin
 {
     public override string ModuleName => "Open Prefire Prac";
-    public override string ModuleVersion => "0.1.30";
+    public override string ModuleVersion => "0.1.32";
     public override string ModuleAuthor => "Lengran";
     public override string ModuleDescription => "A plugin for practicing prefire in CS2. https://github.com/lengran/OpenPrefirePrac";
 
@@ -64,10 +65,10 @@ public class OpenPrefirePrac : BasePlugin
 
         _translator = new Translator(Localizer, ModuleDirectory, CultureInfo.CurrentCulture.Name);
 
-        Console.WriteLine("[HIME] Registering listeners.");
         RegisterListener<Listeners.OnClientPutInServer>(OnClientPutInServerHandler);
         RegisterListener<Listeners.OnClientDisconnect>(OnClientDisconnectHandler);
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
+        RegisterListener<Listeners.OnTick>(OnTickHandler);
 
         LoadDefaultSettings();
 
@@ -110,14 +111,16 @@ public class OpenPrefirePrac : BasePlugin
             }
         }
 
-        RegisterListener<Listeners.OnTick>(PlayerOnTick);
-
         RegisterCommand();
     }
 
     public override void Unload(bool hotReload)
     {
         UnregisterCommand();
+
+        RemoveListener<Listeners.OnClientPutInServer>(OnClientPutInServerHandler);
+        RemoveListener<Listeners.OnMapStart>(OnMapStartHandler);
+        RemoveListener<Listeners.OnTick>(OnTickHandler);
 
         if (hotReload)
         {
@@ -141,51 +144,6 @@ public class OpenPrefirePrac : BasePlugin
             _serverStatus.IntConvars.Clear();
             _serverStatus.FloatConvars.Clear();
             _serverStatus.StringConvars.Clear();
-        }
-    }
-
-    public void PlayerOnTick()
-    {
-        try
-        {
-            foreach (var player in Utilities.GetPlayers().Where(player => player is { IsValid: true, IsBot: false, PawnIsAlive: true, IsHLTV: false }))
-            {
-                if (_playerStatuses[player].PracticeIndex == -1)
-                {
-                    SetMoveType(player, MoveType_t.MOVETYPE_NONE);
-                    player.PrintToCenterAlert("输入 !prefire 开始你的训练 \n由于未开始，当前无法移动");
-                }
-                else
-                {
-                    if (player.PlayerPawn.Value!.MoveType == MoveType_t.MOVETYPE_NONE)
-                    {
-                        SetMoveType(player, MoveType_t.MOVETYPE_WALK);
-                    }
-                    player.PrintToCenterAlert(_translator!.Translate(player, "practice.progress", _playerStatuses[player].EnabledTargets.Count, _playerStatuses[player].EnabledTargets.Count - _playerStatuses[player].Progress + _playerStatuses[player].Bots.Count));
-                }
-            }
-
-            foreach (var bot in Utilities.GetPlayers().Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
-            {
-                bot.Clan = "HIME-BOT";
-                bot.ClanName = "HIME-BOT";
-                CCSBot Getbot = bot.PlayerPawn.Value!.Bot!;
-                RefillAmmo(bot);
-                /*
-                if (Getbot.IsEnemyVisible)
-                {
-                    PlayerButtons getbuttons = bot.Buttons;
-                    getbuttons |= PlayerButtons.Attack;
-                    Schema.SetSchemaValue<PlayerButtons>(bot.Handle, "CPlayer_MovementServices", "m_nButtons", getbuttons);
-                }*/
-            }
-        }
-        catch (Exception ex)
-        {
-            if (ex.Message != "Invalid game event")
-            {
-                Logger.LogInformation("[HIME] TimerOnTick :" + ex.Message);
-            }
         }
     }
 
@@ -423,8 +381,8 @@ public class OpenPrefirePrac : BasePlugin
 
                     // Try to increase bot difficulty
                     //playerOrBot.PlayerPawn.Value!.Bot!.CombatRange = 2000;
-                    playerOrBot.ExecuteClientCommand("slot2");
-                    playerOrBot.ExecuteClientCommand("slot1");
+                    //playerOrBot.ExecuteClientCommand("slot2");
+                    //playerOrBot.ExecuteClientCommand("slot1");
                 }
                 else
                 {
@@ -808,6 +766,7 @@ public class OpenPrefirePrac : BasePlugin
             {
                 Console.WriteLine($"[HIME] Error: Player has an invalid bot. Unmanage it.");
                 botsToDelete.Add(bot);
+                continue;
             }
 
             if (bot.PawnIsAlive)
@@ -879,23 +838,33 @@ public class OpenPrefirePrac : BasePlugin
 
         for (var i = 0; i < numberOfBots; i++)
         {
-            Server.ExecuteCommand("bot_join_team CT");
-            Server.ExecuteCommand("bot_add_ct");
+            AddTimer(i * 0.1f, () => {
+                Server.ExecuteCommand("bot_join_team CT");
+                Server.ExecuteCommand("bot_add_ct");
+            });
         }
     }
 
     private void MovePlayer(CCSPlayerController? player, bool crouch, Vector pos, QAngle ang)
     {
-        if (player == null || !player.PawnIsAlive || player.PlayerPawn.Value == null)
+        if (player == null || !player.IsValid || !player.PawnIsAlive || player.PlayerPawn.Value == null)
         {
             return;
         }
         // Only bot can crouch
-        if (crouch && player.IsBot)
+        if (player.IsBot)
         {
             var movementService = new CCSPlayer_MovementServices(player.PlayerPawn.Value.MovementServices!.Handle);
-            AddTimer(0.1f, () => movementService.DuckAmount = 1);
-            AddTimer(0.2f, () => player.PlayerPawn.Value!.Bot!.IsCrouching = true);
+            if (crouch)
+            {
+                AddTimer(0.05f, () => movementService.DuckAmount = 1);
+                AddTimer(0.1f, () => player.PlayerPawn.Value.Bot!.IsCrouching = true);
+            }
+            else
+            {
+                AddTimer(0.05f, () => movementService.DuckAmount = 0);
+                AddTimer(0.1f, () => player.PlayerPawn.Value.Bot!.IsCrouching = false);
+            }
         }
 
         player.PlayerPawn.Value.Teleport(pos, ang, Vector.Zero);
@@ -1058,6 +1027,7 @@ public class OpenPrefirePrac : BasePlugin
             "bot_allow_pistols",
             "bot_allow_rifles",
             "bot_allow_snipers",
+            "sv_auto_adjust_bot_difficulty",
         ];
 
         string[] intConvarNames = [
@@ -1078,6 +1048,7 @@ public class OpenPrefirePrac : BasePlugin
         string[] floatConvarNames = [
             "mp_respawn_immunitytime",
             //"mp_buytime",
+            "bot_max_vision_distance_override",
         ];
 
         string[] stringConvarNames = [
@@ -1227,6 +1198,7 @@ public class OpenPrefirePrac : BasePlugin
         Server.ExecuteCommand("bot_allow_pistols 1");
         Server.ExecuteCommand("bot_allow_rifles 1");
         Server.ExecuteCommand("bot_allow_snipers 1");
+        Server.ExecuteCommand("sv_auto_adjust_bot_difficulty 0");
 
         Server.ExecuteCommand("mp_buy_anywhere 0");
         Server.ExecuteCommand("mp_warmup_pausetimer 1");
@@ -1243,6 +1215,7 @@ public class OpenPrefirePrac : BasePlugin
 
         Server.ExecuteCommand("mp_respawn_immunitytime -1");
         Server.ExecuteCommand("mp_buytime 0");
+        Server.ExecuteCommand("bot_max_vision_distance_override 99999");
 
         Server.ExecuteCommand("bot_quota_mode normal");
 
@@ -1387,6 +1360,7 @@ public class OpenPrefirePrac : BasePlugin
             {
                 SaveConvars();
                 SetupConvars();
+                AddTimer(0.5f, () => BreakBreakables());
             }
 
             var previousPracticeIndex = _playerStatuses[player].PracticeIndex;
@@ -1863,5 +1837,163 @@ public class OpenPrefirePrac : BasePlugin
 
         Server.ExecuteCommand($"bot_kick {bot.PlayerName}");
         Console.WriteLine($"[HIME] Exec command: bot_kick {bot.PlayerName}");
+    }
+    
+    // Thanks to B3none
+    // Code borrowed from cs2-retake/RetakesPlugin/Modules/Managers/BreakerManager.cs
+    private void BreakBreakables()
+    {
+        // Enable this feature only on nuke and mirage. (mirage is disabled because of the crash issue on Windows)
+        if (Server.MapName != "de_nuke") // && Server.MapName != "de_mirage")
+        {
+            Console.WriteLine($"[HIME] Map {Server.MapName} doesn't have breakables to break.");
+            return;
+        }
+
+        Console.WriteLine($"[HIME] Map {Server.MapName} have breakables to break.");
+
+        // Enable certain breakables on certain maps to avoid game crash
+        List<string> enabled_breakables =
+        [
+            // Common breakables
+            "func_breakable",
+            "func_breakable_surf",
+            "prop.breakable.01",
+            "prop.breakable.02",
+        ];
+
+        if (Server.MapName == "de_nuke")
+        {
+            enabled_breakables.Add("prop_door_rotating");
+            enabled_breakables.Add("prop_dynamic");
+        }
+
+        if (Server.MapName == "de_mirage")
+        {
+            enabled_breakables.Add("prop_dynamic");
+        }
+
+        //Console.WriteLine($"[HIME] DEBUG: Have breakables: {enabled_breakables}");
+
+        // Loop to find breakables
+        CEntityIdentity ?pEntity = new CEntityIdentity(EntitySystem.FirstActiveEntity);
+        while (pEntity != null && pEntity.Handle != IntPtr.Zero)
+        {
+            if (!enabled_breakables.Contains(pEntity.DesignerName))
+            {
+                pEntity = pEntity.Next;
+                continue;
+            }
+
+            switch (pEntity.DesignerName)
+            {
+                case "func_breakable":
+                case "func_breakable_surf":
+                case "prop.breakable.01":
+                case "prop.breakable.02":
+                case "prop_dynamic":
+                    CBreakable breakableEntity = new PointerTo<CBreakable>(pEntity.Handle).Value;
+                    if (breakableEntity.IsValid)
+                    {
+                        breakableEntity.AcceptInput("Break");
+                    }
+                    break;
+                case "func_button":
+                    CBaseButton button = new PointerTo<CBaseButton>(pEntity.Handle).Value;
+                    if (button.IsValid)
+                    {
+                        button.AcceptInput("Kill");
+                    }
+                    break;
+                case "prop_door_rotating":
+                    CPropDoorRotating propDoorRotating = new PointerTo<CPropDoorRotating>(pEntity.Handle).Value;
+                    if (propDoorRotating.IsValid)
+                    {
+                        propDoorRotating.AcceptInput("Open");
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            // Get next entity
+            pEntity = pEntity.Next;
+        }
+    }
+
+    private void OnTickHandler()
+    {
+        try
+        {
+            foreach (var player in Utilities.GetPlayers().Where(player => player is { IsValid: true, IsBot: false, PawnIsAlive: true, IsHLTV: false }))
+            {
+                if (_playerStatuses[player].PracticeIndex == -1)
+                {
+                    SetMoveType(player, MoveType_t.MOVETYPE_NONE);
+                    player.PrintToCenterAlert("输入 !prefire 开始你的训练 \n由于未开始，当前无法移动");
+                }
+                else
+                {
+                    if (player.PlayerPawn.Value!.MoveType == MoveType_t.MOVETYPE_NONE)
+                    {
+                        SetMoveType(player, MoveType_t.MOVETYPE_WALK);
+                    }
+                    player.PrintToCenterAlert(_translator!.Translate(player, "practice.progress", _playerStatuses[player].EnabledTargets.Count, _playerStatuses[player].EnabledTargets.Count - _playerStatuses[player].Progress + _playerStatuses[player].Bots.Count));
+                }
+            }
+
+            foreach (var bot in Utilities.GetPlayers().Where(bot => bot is { IsValid: true, IsBot: true, PawnIsAlive: true, IsHLTV: false }))
+            {
+                bot.Clan = "HIME-BOT";
+                bot.ClanName = "HIME-BOT";
+                RefillAmmo(bot);
+            }
+        }
+        catch (Exception ex)
+        {
+            if (ex.Message != "Invalid game event")
+            {
+                Logger.LogInformation("[HIME] TimerOnTick :" + ex.Message);
+            }
+        }
+
+        foreach (var player in _playerStatuses.Keys)
+        {
+            if (player == null || !player.IsValid || !player.PawnIsAlive || player.PlayerPawn.Value == null)
+            {
+                continue;
+            }
+
+            // Aimlock bots
+            Vector ownerEyePos = new Vector(player.PlayerPawn.Value.AbsOrigin!.X, player.PlayerPawn.Value.AbsOrigin!.Y, player.PlayerPawn.Value.AbsOrigin!.Z + player.PlayerPawn.Value.ViewmodelOffsetZ);
+
+            foreach(var bot in _playerStatuses[player].Bots)
+            {
+                if (!bot.IsValid || !bot.PawnIsAlive || bot.PlayerPawn.Value == null)
+                {
+                    continue;
+                }
+
+                Vector botEyePosition = new Vector(bot.PlayerPawn.Value.AbsOrigin!.X, bot.PlayerPawn.Value.AbsOrigin!.Y, bot.PlayerPawn.Value.AbsOrigin!.Z + bot.PlayerPawn.Value.ViewmodelOffsetZ);
+
+                // calculate angle
+                float deltaX = ownerEyePos.X - botEyePosition.X;
+                float deltaY = ownerEyePos.Y - botEyePosition.Y;
+                float deltaZ = ownerEyePos.Z - botEyePosition.Z;
+                double yaw = 180 * Math.Atan2(deltaY, deltaX) / Math.PI;
+                double tmp = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+                double pitch= 180 * Math.Atan2(-1 * deltaZ, tmp) / Math.PI;
+                QAngle angle = new QAngle((float)pitch, (float)yaw, 0);
+
+                Server.NextFrame(() => {
+                    if (pitch < 15 && pitch > -15)
+                    {
+                        bot.PlayerPawn.Value.Teleport(null, angle, null);
+                    }
+                    bot.PlayerPawn.Value.EyeAngles.X = (float)pitch;
+                    bot.PlayerPawn.Value.EyeAngles.Y = (float)yaw;
+                });
+            }
+        }
     }
 }
