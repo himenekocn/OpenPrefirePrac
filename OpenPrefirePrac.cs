@@ -23,16 +23,16 @@ public class OpenPrefirePrac : BasePlugin
     public override string ModuleAuthor => "Lengran";
     public override string ModuleDescription => "A plugin for practicing prefire in CS2. https://github.com/lengran/OpenPrefirePrac";
 
-    private readonly Dictionary<CCSPlayerController, PlayerStatus> _playerStatuses = new();
+    private readonly Dictionary<int, PlayerStatus> _playerStatuses = new();
 
-    private readonly Dictionary<CCSPlayerController, CCSPlayerController> _ownerOfBots = new();       // Map: bots -> owners.
+    private readonly Dictionary<int, int> _ownerOfBots = new();       // Map: bots -> owners.
 
     private readonly Dictionary<string, int> _practiceNameToId = new();
 
     private readonly Dictionary<int, bool> _practiceEnabled = new();
 
-    public static Dictionary<CCSPlayerController, Weapon> _playerWeapon = new();
-    public static Dictionary<CCSPlayerController, Weapon> _playerPWeapon = new();
+    public static Dictionary<int, Weapon> _playerWeapon = new();
+    public static Dictionary<int, Weapon> _playerPWeapon = new();
 
     private string _mapName = "";
 
@@ -50,7 +50,7 @@ public class OpenPrefirePrac : BasePlugin
 
     private Translator? _translator;
 
-    private readonly Dictionary<CCSPlayerController, int> _botRequests = new();         // make this thread-safe if necessary
+    private readonly Dictionary<int, int> _botRequests = new();         // make this thread-safe if necessary
 
     private DefaultConfig? _defaultPlayerSettings;
 
@@ -195,7 +195,7 @@ public class OpenPrefirePrac : BasePlugin
     // [GameEventHandler]
     public void OnClientPutInServerHandler(int slot)
     {
-        var player = new CCSPlayerController(NativeAPI.GetEntityFromIndex(slot + 1));
+        var player = Utilities.GetPlayerFromSlot(slot);
 
         if (player == null || !player.IsValid || player.IsHLTV)
         {
@@ -205,7 +205,7 @@ public class OpenPrefirePrac : BasePlugin
         if (player.IsBot)
         {
             // For bots: If someone is practicing and it's an unmanaged bot, add or kick the bot
-            if (_playerCount > 0 && !_ownerOfBots.ContainsKey(player))
+            if (_playerCount > 0 && !_ownerOfBots.ContainsKey(slot))
             {
                 if (_botRequests.Count > 0)
                 {
@@ -221,14 +221,14 @@ public class OpenPrefirePrac : BasePlugin
                     }
 
                     // Put this bot under management
-                    _playerStatuses[tmpPlayerNumBots.Key].Bots.Add(player);
-                    _ownerOfBots.Add(player, tmpPlayerNumBots.Key);
-                    Console.WriteLine($"[HIME] Bot {player.PlayerName}, slot: {player.Slot} has been spawned.");
+                    _playerStatuses[tmpPlayerNumBots.Key].Bots.Add(slot);
+                    _ownerOfBots.Add(slot, tmpPlayerNumBots.Key);
+                    Console.WriteLine($"[OpenPrefirePrac] Bot {player.PlayerName}, slot: {slot} has been spawned.");
                 }
                 else
                 {
                     // Already have enough bots, kick this bot.
-                    KickBot(player);
+                    KickBot(slot);
                 }
             }
         }
@@ -246,9 +246,9 @@ public class OpenPrefirePrac : BasePlugin
             }
             else
             {
-                _playerStatuses.Add(player, new PlayerStatus(_defaultPlayerSettings!));
-                _playerWeapon.Add(player, new Weapon("weapon_ak47"));
-                _playerPWeapon.Add(player, new Weapon("weapon_deagle"));
+                _playerStatuses.Add(slot, new PlayerStatus(_defaultPlayerSettings!));
+                _playerWeapon.Add(slot, new Weapon("weapon_ak47"));
+                _playerPWeapon.Add(slot, new Weapon("weapon_deagle"));
 
                 _translator!.RecordPlayerCulture(player);
             }
@@ -261,30 +261,30 @@ public class OpenPrefirePrac : BasePlugin
     {
         var player = @event.Userid;
 
-        if (!_playerStatuses.ContainsKey(player))
+        if (!_playerStatuses.ContainsKey(player.Slot))
             return HookResult.Continue;
 
-        if (_playerStatuses[player].PracticeIndex != -1)
+        if (_playerStatuses[player.Slot].PracticeIndex != -1)
         {
-            ExitPrefireMode(player);
+            ExitPrefireMode(player.Slot);
         }
 
         // Release resources(practices, targets, bots...)
-        _playerStatuses.Remove(player);
+        _playerStatuses.Remove(player.Slot);
 
-        if (_playerWeapon.ContainsKey(player))
+        if (_playerWeapon.ContainsKey(player.Slot))
         {
-            _playerWeapon.Remove(player);
+            _playerWeapon.Remove(player.Slot);
         }
 
         if (_playerPWeapon.ContainsKey(player))
         {
-            _playerPWeapon.Remove(player);
+            _playerPWeapon.Remove(player.Slot);
         }
 
         if (_botRequests.ContainsKey(player))
         {
-            _botRequests.Remove(player);
+            _botRequests.Remove(player.Slot);
         }
 
         return HookResult.Continue;
@@ -333,33 +333,33 @@ public class OpenPrefirePrac : BasePlugin
 
         if (playerOrBot.IsBot)
         {
-            if (_ownerOfBots.ContainsKey(playerOrBot))
+            if (_ownerOfBots.ContainsKey(playerOrBot.Slot))
             {
                 // For managed bots
-                var owner = _ownerOfBots[playerOrBot];
-                var targetNo = _playerStatuses[owner].Progress;
-                var practiceIndex = _playerStatuses[owner].PracticeIndex;
+                int ownerSlot = _ownerOfBots[playerOrBot.Slot];
+                var targetNo = _playerStatuses[ownerSlot].Progress;
+                var practiceIndex = _playerStatuses[ownerSlot].PracticeIndex;
 
-                if (targetNo < _playerStatuses[owner].EnabledTargets.Count)
+                if (targetNo < _playerStatuses[ownerSlot].EnabledTargets.Count)
                 {
                     // If there are more targets to place, move bot to next place
-                    _playerStatuses[owner].Progress++;
+                    _playerStatuses[ownerSlot].Progress++;
 
-                    AddTimer(0.5f, () => MovePlayer(playerOrBot,
-                        _practices[practiceIndex].Targets[_playerStatuses[owner].EnabledTargets[targetNo]]
+                    AddTimer(0.5f, () => FreezeBot(playerOrBot));
+
+                    AddTimer(0.55f, () => MovePlayer(playerOrBot,
+                        _practices[practiceIndex].Targets[_playerStatuses[ownerSlot].EnabledTargets[targetNo]]
                             .IsCrouching,
-                        _practices[practiceIndex].Targets[_playerStatuses[owner].EnabledTargets[targetNo]].Position,
-                        _practices[practiceIndex].Targets[_playerStatuses[owner].EnabledTargets[targetNo]]
+                        _practices[practiceIndex].Targets[_playerStatuses[ownerSlot].EnabledTargets[targetNo]].Position,
+                        _practices[practiceIndex].Targets[_playerStatuses[ownerSlot].EnabledTargets[targetNo]]
                             .Rotation));
 
-                    AddTimer(0.55f, () => FreezeBot(playerOrBot));
-
                     // Give bot weapons
-                    if (_playerStatuses[owner].BotWeapon > 0)
+                    if (_playerStatuses[ownerSlot].BotWeapon > 0)
                     {
                         SetMoney(playerOrBot, 0);
                         playerOrBot.RemoveWeapons();
-                        switch (_playerStatuses[owner].BotWeapon)
+                        switch (_playerStatuses[ownerSlot].BotWeapon)
                         {
                             case 1:
                                 playerOrBot.GiveNamedItem("weapon_ump45");
@@ -391,16 +391,19 @@ public class OpenPrefirePrac : BasePlugin
                     //     Bot B is died while Bot A is still spawning, so progress 
                     //     is not updated in time. This could cause Bot B not being
                     //     kicked. So kick them here.
-                    _ownerOfBots.Remove(playerOrBot);
-                    _playerStatuses[owner].Bots.Remove(playerOrBot);
-                    KickBot(playerOrBot);
+                    _ownerOfBots.Remove(playerOrBot.Slot);
+                    _playerStatuses[ownerSlot].Bots.Remove(playerOrBot.Slot);
+                    KickBot(playerOrBot.Slot);
 
-                    if (_playerStatuses[owner].Bots.Count == 0)
+                    if (_playerStatuses[ownerSlot].Bots.Count == 0)
                     {
-                        // Practice finished.
-                        owner.PrintToChat(
-                            $" {ChatColors.Green}[HIME] {ChatColors.White}{_translator!.Translate(owner, "practice.finish")}");
-                        ExitPrefireMode(owner);
+                        var owner = Utilities.GetPlayerFromSlot(ownerSlot);
+
+                        if (owner != null && owner.IsValid && !owner.IsBot && !owner.IsHLTV)
+                        {
+                            owner.PrintToChat($" {ChatColors.Green}[OpenPrefirePrac] {ChatColors.White}{_translator!.Translate(owner, "practice.finish")}");
+                            ExitPrefireMode(ownerSlot);
+                        }
                     }
                 }
             }
@@ -414,10 +417,10 @@ public class OpenPrefirePrac : BasePlugin
         else
         {
             // For players: Set them up if they are practicing.
-            if (!_playerStatuses.ContainsKey(playerOrBot))
+            if (!_playerStatuses.ContainsKey(playerOrBot.Slot))
                 return HookResult.Continue;
 
-            if (_playerStatuses[playerOrBot].PracticeIndex < 0)
+            if (_playerStatuses[playerOrBot.Slot].PracticeIndex < 0)
                 return HookResult.Continue;
 
             SetupPrefireMode(playerOrBot);
@@ -446,14 +449,22 @@ public class OpenPrefirePrac : BasePlugin
 
         if (playerOrBot.IsBot)
         {
-            if (_ownerOfBots.ContainsKey(playerOrBot))
+            if (_ownerOfBots.ContainsKey(playerOrBot.Slot))
             {
                 // For managed bots
-                var owner = _ownerOfBots[playerOrBot];
-                var targetNo = _playerStatuses[owner].Progress;
-                var practiceIndex = _playerStatuses[owner].PracticeIndex;
+                int ownerSlot = _ownerOfBots[playerOrBot.Slot];
+                var targetNo = _playerStatuses[ownerSlot].Progress;
+                var practiceIndex = _playerStatuses[ownerSlot].PracticeIndex;
 
-                if (targetNo >= _practices[practiceIndex].NumBots)         // Bots will be killed after their first time getting spawned, so as to move them to target spots.
+                var owner = Utilities.GetPlayerFromSlot(ownerSlot);
+
+                if (owner == null || !owner.IsValid || owner.IsBot || owner.IsHLTV)
+                {
+                    Console.WriteLine($"[OpenPrefirePrac] The owner of bot ({playerOrBot.PlayerName}) is not right. This could be a bug.");
+                    return HookResult.Continue;
+                }
+
+                if (targetNo >= _practices[practiceIndex].NumBots)          // Bots will be killed after their first time getting spawned, so as to move them to target spots.
                 {
                     // Award the player.
                     if (owner.PawnIsAlive && owner.Pawn.Value != null)
@@ -461,10 +472,10 @@ public class OpenPrefirePrac : BasePlugin
                         owner.GiveNamedItem("item_assaultsuit");
                         RefillAmmo(owner);
 
-                        if (_playerStatuses[owner].HealingMethod > 1)
+                        if (_playerStatuses[ownerSlot].HealingMethod > 1)
                         {
                             var currentHp = owner.Pawn.Value.Health;
-                            switch (_playerStatuses[owner].HealingMethod)
+                            switch (_playerStatuses[ownerSlot].HealingMethod)
                             {
                                 case 2:
                                     currentHp = currentHp + 25;
@@ -487,17 +498,17 @@ public class OpenPrefirePrac : BasePlugin
                 }
 
                 // Kick unnecessary bots
-                if (targetNo >= _playerStatuses[owner].EnabledTargets.Count)
+                if (targetNo >= _playerStatuses[ownerSlot].EnabledTargets.Count)
                 {
-                    _ownerOfBots.Remove(playerOrBot);
-                    _playerStatuses[owner].Bots.Remove(playerOrBot);
-                    KickBot(playerOrBot);
+                    _ownerOfBots.Remove(playerOrBot.Slot);
+                    _playerStatuses[ownerSlot].Bots.Remove(playerOrBot.Slot);
+                    KickBot(playerOrBot.Slot);
 
-                    if (_playerStatuses[owner].Bots.Count == 0)
+                    if (_playerStatuses[ownerSlot].Bots.Count == 0)
                     {
                         // Practice finished.
                         owner.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White}{_translator!.Translate(owner, "practice.finish")}");
-                        ExitPrefireMode(owner);
+                        ExitPrefireMode(ownerSlot);
                     }
                 }
                 else
@@ -522,15 +533,15 @@ public class OpenPrefirePrac : BasePlugin
         else
         {
             // For players: If some bots have already been kicked, add them back.
-            if (!_playerStatuses.ContainsKey(playerOrBot))
+            if (!_playerStatuses.ContainsKey(playerOrBot.Slot))
                 return HookResult.Continue;
 
-            var practiceIndex = _playerStatuses[playerOrBot].PracticeIndex;
-            var numBots = _playerStatuses[playerOrBot].Bots.Count;
+            var practiceIndex = _playerStatuses[playerOrBot.Slot].PracticeIndex;
+            var numBots = _playerStatuses[playerOrBot.Slot].Bots.Count;
 
             if (practiceIndex > -1 && numBots < _practices[practiceIndex].NumBots)
             {
-                _playerStatuses[playerOrBot].Progress = 0;
+                _playerStatuses[playerOrBot.Slot].Progress = 0;
                 AddBot(playerOrBot, _practices[practiceIndex].NumBots - numBots);
             }
         }
@@ -540,7 +551,7 @@ public class OpenPrefirePrac : BasePlugin
 
     public void OnRouteSelect(CCSPlayerController player, ChatMenuOption option)
     {
-        int practiceNo = _playerStatuses[player].LocalizedPracticeNames[option.Text];
+        int practiceNo = _playerStatuses[player.Slot].LocalizedPracticeNames[option.Text];
         StartPractice(player, practiceNo);
         CloseCurrentMenu(player);
     }
@@ -579,12 +590,12 @@ public class OpenPrefirePrac : BasePlugin
     {
         // Dynamically draw menu
         var difficultyMenu = new ChatMenu(_translator!.Translate(player, "difficulty.title"));
-        _playerStatuses[player].LocalizedDifficultyNames.Clear();
+        _playerStatuses[player.Slot].LocalizedDifficultyNames.Clear();
 
         for (var i = 0; i < 5; i++)
         {
             var tmpLocalizedDifficultyName = _translator.Translate(player, $"difficulty.{i}");
-            _playerStatuses[player].LocalizedDifficultyNames.Add(tmpLocalizedDifficultyName, i);
+            _playerStatuses[player.Slot].LocalizedDifficultyNames.Add(tmpLocalizedDifficultyName, i);
             difficultyMenu.AddMenuOption(tmpLocalizedDifficultyName, OnDifficultyChosen); // practice name here is split by space instead of underline. TODO: Use localized text.
         }
 
@@ -597,7 +608,7 @@ public class OpenPrefirePrac : BasePlugin
 
     public void OnDifficultyChosen(CCSPlayerController player, ChatMenuOption option)
     {
-        int difficultyNo = _playerStatuses[player].LocalizedDifficultyNames[option.Text];
+        int difficultyNo = _playerStatuses[player.Slot].LocalizedDifficultyNames[option.Text];
         ChangeDifficulty(player, difficultyNo);
         CloseCurrentMenu(player);
     }
@@ -605,12 +616,12 @@ public class OpenPrefirePrac : BasePlugin
     public void OpenModeMenu(CCSPlayerController player, ChatMenuOption option)
     {
         var trainingModeMenu = new ChatMenu(_translator!.Translate(player, "modemenu.title"));
-        _playerStatuses[player].LocalizedTrainingModeNames.Clear();
+        _playerStatuses[player.Slot].LocalizedTrainingModeNames.Clear();
 
         for (var i = 0; i < 2; i++)
         {
             var tmpLocalizedTrainingModeName = _translator.Translate(player, $"modemenu.{i}");
-            _playerStatuses[player].LocalizedTrainingModeNames.Add(tmpLocalizedTrainingModeName, i);
+            _playerStatuses[player.Slot].LocalizedTrainingModeNames.Add(tmpLocalizedTrainingModeName, i);
             trainingModeMenu.AddMenuOption(tmpLocalizedTrainingModeName, OnModeChosen);
         }
 
@@ -623,7 +634,7 @@ public class OpenPrefirePrac : BasePlugin
 
     public void OnModeChosen(CCSPlayerController player, ChatMenuOption option)
     {
-        var trainingModeNo = _playerStatuses[player].LocalizedTrainingModeNames[option.Text];
+        var trainingModeNo = _playerStatuses[player.Slot].LocalizedTrainingModeNames[option.Text];
         ChangeTrainingMode(player, trainingModeNo);
         CloseCurrentMenu(player);
     }
@@ -696,76 +707,30 @@ public class OpenPrefirePrac : BasePlugin
         }
     }
 
-    private void ExitPrefireMode(CCSPlayerController player)
+    private void ExitPrefireMode(int playerSlot)
     {
-        /*
-        var previousPracticeNo = _playerStatuses[player].PracticeIndex;
-        if (previousPracticeNo > -1)
-        {
-            RemoveBots(player);
-            DeleteGuidingLine(player);
-
-            // Enable disabled practice routes
-            for (var i = 0; i < _practices[previousPracticeNo].IncompatiblePractices.Count; i++)
-            {
-                if (_practiceNameToId.TryGetValue(_practices[previousPracticeNo].IncompatiblePractices[i], out var value))
-                {
-                    _practiceEnabled[value] = true;
-                }
-            }
-            _practiceEnabled[previousPracticeNo] = true;
-
-            _playerStatuses[player].PracticeIndex = -1;
-            _playerCount--;
-
-            // patch: check and remove request of bots in case something goes wrong resulting in a stuck request
-            if (_botRequests.ContainsKey(player))
-            {
-                _botRequests.Remove(player);
-            }
-        }
-        */
-        UnsetPrefireMode(player);
+        UnsetPrefireMode(playerSlot);
 
         if (_playerCount == 0)
         {
-            // Server.ExecuteCommand("sv_cheats 0");
-            // Server.ExecuteCommand("mp_warmup_pausetimer 0");
-            // Server.ExecuteCommand("bot_quota_mode competitive");
-            // Server.ExecuteCommand("tv_enable 1");
-            // Server.ExecuteCommand("weapon_auto_cleanup_time 0");
-            // Server.ExecuteCommand("mp_buytime 20");
-            // Server.ExecuteCommand("mp_maxmoney 16000");
-            // Server.ExecuteCommand("mp_startmoney 16000");
-            // Server.ExecuteCommand("mp_buy_anywhere 0");
-            // Server.ExecuteCommand("mp_free_armor 0");
-            // // Server.ExecuteCommand("mp_roundtime 1.92");
-            // // Server.ExecuteCommand("mp_roundtime_defuse 1.92");
-            // // Server.ExecuteCommand("mp_team_intro_time 6.5");
-            // // Server.ExecuteCommand("mp_freezetime 15");
-            // // Server.ExecuteCommand("mp_ignore_round_win_conditions 0");
-            // // Server.ExecuteCommand("mp_respawn_on_death_ct 0");
-            // // Server.ExecuteCommand("mp_respawn_on_death_t 0");
-            // Server.ExecuteCommand("sv_alltalk 1");
-            // Server.ExecuteCommand("sv_full_alltalk 1");
-            // Server.ExecuteCommand("mp_warmup_start");
-
             RestoreConvars();
         }
     }
 
-    private void ResetBots(CCSPlayerController player)
+    private void ResetBots(int slot)
     {
-        _playerStatuses[player].Progress = 0;
+        _playerStatuses[slot].Progress = 0;
 
-        List<CCSPlayerController> botsToDelete = new List<CCSPlayerController>();
+        List<slot> botsToDelete = new List<slot>();
 
-        foreach (var bot in _playerStatuses[player].Bots)
+        foreach (var botSlot in _playerStatuses[slot].Bots)
         {
-            if (!bot.IsValid)
+            var bot = Utilities.GetPlayerFromSlot(botSlot);
+
+            if (bot == null || !bot.IsValid)
             {
                 Console.WriteLine($"[HIME] Error: Player has an invalid bot. Unmanage it.");
-                botsToDelete.Add(bot);
+                botsToDelete.Add(botSlot);
                 continue;
             }
 
@@ -776,26 +741,25 @@ public class OpenPrefirePrac : BasePlugin
         }
 
         AddTimer(3f, () => {
-            foreach (var bot in botsToDelete)
+            foreach (int bot in botsToDelete)
             {
-                _playerStatuses[player].Bots.Remove(bot);
-                _ownerOfBots.Remove(bot);
+                KickBot(bot);
             }
         });
     }
 
     private void SetupPrefireMode(CCSPlayerController player)
     {
-        var practiceNo = _playerStatuses[player].PracticeIndex;
+        var practiceNo = _playerStatuses[player.Slot].PracticeIndex;
 
-        GenerateRandomPractice(player);
-        AddTimer(0.5f, () => ResetBots(player));
+        GenerateRandomPractice(player.Slot);
+        AddTimer(0.5f, () => ResetBots(player.Slot));
 
         //DeleteGuidingLine(player);
         //AddTimer(0.1f, () => DrawGuidingLine(player));
 
         // Setup player's HP
-        if (_playerStatuses[player].HealingMethod == 1 || _playerStatuses[player].HealingMethod == 4)
+        if (_playerStatuses[player.Slot].HealingMethod == 1 || _playerStatuses[player.Slot].HealingMethod == 4)
             AddTimer(0.5f, () => SetPlayerHealth(player, 500));
         else
             AddTimer(0.5f, () => SetPlayerHealth(player, 100));
@@ -804,22 +768,24 @@ public class OpenPrefirePrac : BasePlugin
         SetMoveType(player, MoveType_t.MOVETYPE_WALK);
     }
 
-    private void RemoveBots(CCSPlayerController player)
+    private void RemoveBots(int slot)
     {
-        foreach (var bot in _playerStatuses[player].Bots)
+        foreach (int botSlot in _playerStatuses[slot].Bots)
         {
-            if (bot.IsValid)
+            var bot = Utilities.GetPlayerFromSlot(botSlot);
+
+            if (bot == null || bot.IsValid)
             {
-                KickBot(bot);
+                KickBot(botSlot);
             }
             else
             {
                 Console.WriteLine($"[HIME] Trying to kick an invalid bot.");
             }
-            _ownerOfBots.Remove(bot);
+            _ownerOfBots.Remove(botSlot);
         }
-        _playerStatuses[player].Bots.Clear();
-        _playerStatuses[player].Progress = 0;
+        _playerStatuses[slot].Bots.Clear();
+        _playerStatuses[slot].Progress = 0;
     }
 
     private void AddBot(CCSPlayerController player, int numberOfBots)
@@ -827,13 +793,13 @@ public class OpenPrefirePrac : BasePlugin
         Console.WriteLine($"[HIME] Creating {numberOfBots} bots.");
 
         // Test a new method of adding bots
-        if (_botRequests.ContainsKey(player))
+        if (_botRequests.ContainsKey(player.Slot))
         {
-            _botRequests[player] = numberOfBots;
+            _botRequests[player.Slot] = numberOfBots;
         }
         else
         {
-            _botRequests.Add(player, numberOfBots);
+            _botRequests.Add(player.Slot, numberOfBots);
         }
 
         for (var i = 0; i < numberOfBots; i++)
@@ -930,15 +896,15 @@ public class OpenPrefirePrac : BasePlugin
         Utilities.SetStateChanged(player.Pawn.Value, "CBaseEntity", "m_iHealth");
     }
 
-    private void GenerateRandomPractice(CCSPlayerController player)
+    private void GenerateRandomPractice(int playerSlot)
     {
-        _playerStatuses[player].EnabledTargets.Clear();
-        var practiceNo = _playerStatuses[player].PracticeIndex;
+        _playerStatuses[playerSlot].EnabledTargets.Clear();
+        var practiceNo = _playerStatuses[playerSlot].PracticeIndex;
 
         for (var i = 0; i < _practices[practiceNo].Targets.Count; i++)
-            _playerStatuses[player].EnabledTargets.Add(i);
+            _playerStatuses[playerSlot].EnabledTargets.Add(i);
 
-        if (_playerStatuses[player].TrainingMode == 0)
+        if (_playerStatuses[playerSlot].TrainingMode == 0)
         {
             // 0: Use part of the targets.
             var numTargets = (int)(_practices[practiceNo].SpawnRatio * _practices[practiceNo].Targets.Count);
@@ -946,14 +912,14 @@ public class OpenPrefirePrac : BasePlugin
 
             var numToRemove = _practices[practiceNo].Targets.Count - numTargets;
             for (var i = 0; i < numToRemove; i++)
-                _playerStatuses[player].EnabledTargets.RemoveAt(rnd.Next(_playerStatuses[player].EnabledTargets.Count));
+                _playerStatuses[playerSlot].EnabledTargets.RemoveAt(rnd.Next(_playerStatuses[playerSlot].EnabledTargets.Count));
         }
         // 1: Use all of the targets.
     }
 
-    private void CreateGuidingLine(CCSPlayerController player)
+    private void CreateGuidingLine(int playerSlot)
     {
-        var practiceNo = _playerStatuses[player].PracticeIndex;
+        var practiceNo = _playerStatuses[playerSlot].PracticeIndex;
 
         if (practiceNo < 0 || practiceNo >= _practices.Count)
         {
@@ -972,26 +938,26 @@ public class OpenPrefirePrac : BasePlugin
             if (beamIndex == -1)
                 return;
 
-            _playerStatuses[player].Beams.Add(beamIndex);
+            _playerStatuses[playerSlot].Beams.Add(beamIndex);
         }
     }
 
-    private void DeleteGuidingLine(CCSPlayerController player)
+    private void DeleteGuidingLine(int playerSlot)
     {
-        for (var i = 0; i < _playerStatuses[player].Beams.Count; i++)
+        for (var i = 0; i < _playerStatuses[playerSlot].Beams.Count; i++)
         {
-            var beam = Utilities.GetEntityFromIndex<CBeam>(_playerStatuses[player].Beams[i]);
+            var beam = Utilities.GetEntityFromIndex<CBeam>(_playerStatuses[playerSlot].Beams[i]);
 
             if (beam == null || !beam.IsValid)
             {
-                Console.WriteLine($"[HIME] Error when deleting guiding line. Failed to get beam entity(index = {_playerStatuses[player].Beams[i]})");
+                Console.WriteLine($"[HIME] Error when deleting guiding line. Failed to get beam entity(index = {_playerStatuses[playerSlot].Beams[i]})");
                 continue;
             }
 
             beam.Remove();
         }
 
-        _playerStatuses[player].Beams.Clear();
+        _playerStatuses[playerSlot].Beams.Clear();
     }
 
     private static int DrawBeam(Vector startPos, Vector endPos)
@@ -1234,6 +1200,28 @@ public class OpenPrefirePrac : BasePlugin
         // Server.ExecuteCommand("mp_respawn_on_death_ct 1");
         // Server.ExecuteCommand("mp_respawn_on_death_t 1");
 
+        AddTimer(2f, () => {
+            var players = Utilities.GetPlayers();
+            List<CCSPlayerController> botsToKick = new List<CCSPlayerController>();
+            foreach(var player in players)
+            {
+                if (player == null || !player.IsValid || player.IsHLTV || !player.IsBot)
+                {
+                    continue;
+                }
+                if (_ownerOfBots.ContainsKey(player.Slot))
+                {
+                    continue;
+                }
+                botsToKick.Add(player);
+            }
+            foreach (var bot in botsToKick)
+            {
+                KickBot(bot.Slot);
+            }
+            botsToKick.Clear();
+        });
+
         Console.WriteLine("[HIME] Values of convars set.");
     }
 
@@ -1363,7 +1351,7 @@ public class OpenPrefirePrac : BasePlugin
                 AddTimer(0.5f, () => BreakBreakables());
             }
 
-            var previousPracticeIndex = _playerStatuses[player].PracticeIndex;
+            var previousPracticeIndex = _playerStatuses[player.Slot].PracticeIndex;
 
             // Check if selected practice route is compatible with other on-playing routes.
             if (previousPracticeIndex != practiceIndex && !_practiceEnabled[practiceIndex])
@@ -1378,13 +1366,13 @@ public class OpenPrefirePrac : BasePlugin
                 // Update practice status
                 if (previousPracticeIndex > -1)
                 {
-                    UnsetPrefireMode(player);
-                    DeleteGuidingLine(player);
+                    UnsetPrefireMode(player.Slot);
+                    DeleteGuidingLine(player.Slot);
                 }
                 _playerCount++;
 
-                _playerStatuses[player].PracticeIndex = practiceIndex;
-                AddTimer(1f, () => CreateGuidingLine(player));
+                _playerStatuses[player.Slot].PracticeIndex = practiceIndex;
+                AddTimer(1f, () => CreateGuidingLine(player.Slot));
 
                 // Disable incompatible practices.
                 for (var i = 0; i < _practices[practiceIndex].IncompatiblePractices.Count; i++)
@@ -1403,11 +1391,11 @@ public class OpenPrefirePrac : BasePlugin
             else
             {
                 // If some bots have already been kicked, add them back.
-                var numRemainingBots = _playerStatuses[player].Bots.Count;
+                var numRemainingBots = _playerStatuses[player.Slot].Bots.Count;
 
                 if (numRemainingBots < _practices[practiceIndex].NumBots)
                 {
-                    _playerStatuses[player].Progress = 0;
+                    _playerStatuses[player.Slot].Progress = 0;
                     AddBot(player, _practices[practiceIndex].NumBots - numRemainingBots);
                 }
             }
@@ -1450,21 +1438,21 @@ public class OpenPrefirePrac : BasePlugin
 
     private void ChangeDifficulty(CCSPlayerController player, int difficultyNo)
     {
-        _playerStatuses[player].HealingMethod = difficultyNo;
+        _playerStatuses[player.Slot].HealingMethod = difficultyNo;
         var currentDifficulty = _translator!.Translate(player, $"difficulty.{difficultyNo}");
         player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White} {_translator!.Translate(player, "difficulty.set", currentDifficulty)}");
     }
 
     private void ChangeTrainingMode(CCSPlayerController player, int trainingMode)
     {
-        _playerStatuses[player].TrainingMode = trainingMode;
+        _playerStatuses[player.Slot].TrainingMode = trainingMode;
         var currentTrainingMode = _translator!.Translate(player, $"modemenu.{trainingMode}");
         player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White} {_translator!.Translate(player, "modemenu.set", currentTrainingMode)}");
     }
 
     private void ForceStopPractice(CCSPlayerController player)
     {
-        ExitPrefireMode(player);
+        ExitPrefireMode(player.Slot);
         player.PrintToChat($" {ChatColors.Green}[HIME] {ChatColors.White}{_translator!.Translate(player, "practice.exit")}");
     }
 
@@ -1665,14 +1653,14 @@ public class OpenPrefirePrac : BasePlugin
             // 2 Map menu
             mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.map"), OpenMapMenu);
             // 3 Difficulty menu
-            string currentDifficulty = _translator.Translate(player, $"difficulty.{_playerStatuses[player].HealingMethod}");
+            string currentDifficulty = _translator.Translate(player, $"difficulty.{_playerStatuses[player.Slot].HealingMethod}");
             mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.difficulty", currentDifficulty), OpenDifficultyMenu);
             // 4 Training mode menu
-            string currentTrainingMode = _translator.Translate(player, $"modemenu.{_playerStatuses[player].TrainingMode}");
+            string currentTrainingMode = _translator.Translate(player, $"modemenu.{_playerStatuses[player.Slot].TrainingMode}");
             mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.mode", currentTrainingMode), OpenModeMenu);
             // 5 Bot weapon menu
             string currentBotWeapon = "";
-            switch (_playerStatuses[player].BotWeapon)
+            switch (_playerStatuses[player.Slot].BotWeapon)
             {
                 case 0:
                     currentBotWeapon = _translator!.Translate(player, "weaponmenu.random");
@@ -1697,7 +1685,7 @@ public class OpenPrefirePrac : BasePlugin
             mainMenu.AddMenuOption("选择主武器", MenuOpenGunMenu);
             mainMenu.AddMenuOption("选择副武器", MenuOpenPistolsMenu);
             // 7 (Optional) End practicing button
-            if (_playerStatuses[player].PracticeIndex > 0)
+            if (_playerStatuses[player.Slot].PracticeIndex > 0)
             {
                 mainMenu.AddMenuOption(_translator.Translate(player, "mainmenu.exit"), OnForceExitPrefireMode);
             }
@@ -1720,7 +1708,7 @@ public class OpenPrefirePrac : BasePlugin
 
     private void SetBotWeapon(CCSPlayerController player, int botWeapon)
     {
-        _playerStatuses[player].BotWeapon = botWeapon;
+        _playerStatuses[player.Slot].BotWeapon = botWeapon;
 
         string weaponName = "";
         switch (botWeapon)
@@ -1749,7 +1737,7 @@ public class OpenPrefirePrac : BasePlugin
     {
         // Dynamically draw menu
         var practiceMenu = new ChatMenu(_translator!.Translate(player, "practicemenu.title"));
-        _playerStatuses[player].LocalizedPracticeNames.Clear();
+        _playerStatuses[player.Slot].LocalizedPracticeNames.Clear();
         var enablepranum = 0;
         // Add menu options for practices
         for (var i = 0; i < _practices.Count; i++)
@@ -1757,16 +1745,16 @@ public class OpenPrefirePrac : BasePlugin
             if (_practiceEnabled[i])
             {
                 var tmpLocalizedPracticeName = _translator.Translate(player, $"map.{_mapName}.{_practices[i].PracticeName}");
-                _playerStatuses[player].LocalizedPracticeNames.Add(tmpLocalizedPracticeName, i);
+                _playerStatuses[player.Slot].LocalizedPracticeNames.Add(tmpLocalizedPracticeName, i);
                 practiceMenu.AddMenuOption(tmpLocalizedPracticeName, OnRouteSelect); // practice name here is split by space instead of underline. TODO: Use localized text.
                 enablepranum++;
             }
         }
-        int practiceNo = _playerStatuses[player].PracticeIndex;
+        int practiceNo = _playerStatuses[player.Slot].PracticeIndex;
         if (practiceNo > -1)
         {
             var tmpLocalizedPracticeName = _translator.Translate(player, $"map.{_mapName}.{_practices[practiceNo].PracticeName}");
-            _playerStatuses[player].LocalizedPracticeNames.Add(tmpLocalizedPracticeName, practiceNo);
+            _playerStatuses[player.Slot].LocalizedPracticeNames.Add(tmpLocalizedPracticeName, practiceNo);
             practiceMenu.AddMenuOption(tmpLocalizedPracticeName, OnRouteSelect);
             enablepranum++;
         }
@@ -1782,13 +1770,13 @@ public class OpenPrefirePrac : BasePlugin
         player.PrintToChat("===========================================");
     }
 
-    private void UnsetPrefireMode(CCSPlayerController player)
+    private void UnsetPrefireMode(int playerSlot)
     {
-        var previousPracticeNo = _playerStatuses[player].PracticeIndex;
+        var previousPracticeNo = _playerStatuses[playerSlot].PracticeIndex;
         if (previousPracticeNo > -1)
         {
-            RemoveBots(player);
-            DeleteGuidingLine(player);
+            RemoveBots(playerSlot);
+            DeleteGuidingLine(playerSlot);
 
             // Enable disabled practice routes
             for (var i = 0; i < _practices[previousPracticeNo].IncompatiblePractices.Count; i++)
@@ -1800,13 +1788,13 @@ public class OpenPrefirePrac : BasePlugin
             }
             _practiceEnabled[previousPracticeNo] = true;
 
-            _playerStatuses[player].PracticeIndex = -1;
+            _playerStatuses[playerSlot].PracticeIndex = -1;
             _playerCount--;
 
             // patch: check and remove request of bots in case something goes wrong resulting in a stuck request
-            if (_botRequests.ContainsKey(player))
+            if (_botRequests.ContainsKey(playerSlot))
             {
-                _botRequests.Remove(player);
+                _botRequests.Remove(playerSlot);
             }
         }
     }
@@ -1823,16 +1811,23 @@ public class OpenPrefirePrac : BasePlugin
         Utilities.SetStateChanged(player, "CCSPlayerController", "m_pInGameMoneyServices");
     }
 
-    private void KickBot(CCSPlayerController bot)
+    private void KickBot(int botSlot)
     {
-        if (bot == null || !bot.IsBot)
+        if (_ownerOfBots.ContainsKey(botSlot))
         {
-            return;
+            int ownerSlot = _ownerOfBots[botSlot];
+            if (_playerStatuses[ownerSlot].Bots.Contains(botSlot))
+            {
+                _playerStatuses[ownerSlot].Bots.Remove(botSlot);
+            }
+            _ownerOfBots.Remove(botSlot);
         }
 
-        if (_ownerOfBots.ContainsKey(bot))
+        var bot = Utilities.GetPlayerFromSlot(botSlot);
+
+        if (bot == null || !bot.IsValid || !bot.IsBot)
         {
-            _ownerOfBots.Remove(bot);
+            return;
         }
 
         Server.ExecuteCommand($"bot_kick {bot.PlayerName}");
@@ -1927,7 +1922,7 @@ public class OpenPrefirePrac : BasePlugin
         {
             foreach (var player in Utilities.GetPlayers().Where(player => player is { IsValid: true, IsBot: false, PawnIsAlive: true, IsHLTV: false }))
             {
-                if (_playerStatuses[player].PracticeIndex == -1)
+                if (_playerStatuses[player.Slot].PracticeIndex == -1)
                 {
                     SetMoveType(player, MoveType_t.MOVETYPE_NONE);
                     player.PrintToCenterAlert("输入 !prefire 开始你的训练 \n由于未开始，当前无法移动");
@@ -1938,7 +1933,7 @@ public class OpenPrefirePrac : BasePlugin
                     {
                         SetMoveType(player, MoveType_t.MOVETYPE_WALK);
                     }
-                    player.PrintToCenterAlert(_translator!.Translate(player, "practice.progress", _playerStatuses[player].EnabledTargets.Count, _playerStatuses[player].EnabledTargets.Count - _playerStatuses[player].Progress + _playerStatuses[player].Bots.Count));
+                    player.PrintToCenterAlert(_translator!.Translate(player, "practice.progress", _playerStatuses[player.Slot].EnabledTargets.Count, _playerStatuses[player.Slot].EnabledTargets.Count - _playerStatuses[player.Slot].Progress + _playerStatuses[player.Slot].Bots.Count));
                 }
             }
 
@@ -1957,7 +1952,7 @@ public class OpenPrefirePrac : BasePlugin
             }
         }
 
-        foreach (var player in _playerStatuses.Keys)
+        foreach (int playerSlot in _playerStatuses.Keys)
         {
             if (player == null || !player.IsValid || !player.PawnIsAlive || player.PlayerPawn.Value == null)
             {
@@ -1967,9 +1962,11 @@ public class OpenPrefirePrac : BasePlugin
             // Aimlock bots
             Vector ownerEyePos = new Vector(player.PlayerPawn.Value.AbsOrigin!.X, player.PlayerPawn.Value.AbsOrigin!.Y, player.PlayerPawn.Value.AbsOrigin!.Z + player.PlayerPawn.Value.ViewmodelOffsetZ);
 
-            foreach(var bot in _playerStatuses[player].Bots)
+            foreach(var botSlot in _playerStatuses[playerSlot].Bots)
             {
-                if (!bot.IsValid || !bot.PawnIsAlive || bot.PlayerPawn.Value == null)
+                var bot = Utilities.GetPlayerFromSlot(botSlot);
+
+                if (bot == null || !bot.IsValid || !bot.PawnIsAlive || bot.PlayerPawn.Value == null)
                 {
                     continue;
                 }
