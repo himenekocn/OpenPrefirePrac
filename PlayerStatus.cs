@@ -20,7 +20,7 @@ public class PlayerStatus
      */
     public int HealingMethod = 2;
 
-    public readonly List<CCSPlayerController> Bots = new();
+    public readonly List<int> Bots = new();
     public readonly Dictionary<string, int> LocalizedPracticeNames = new();
     public readonly Dictionary<string, int> LocalizedDifficultyNames = new();
 
